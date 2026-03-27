@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createClient()
+  const { id } = await params
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -14,7 +15,7 @@ export async function POST(
   const { data: post, error: postError } = await supabase
     .from('posts')
     .select('id, client_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (postError || !post) {
@@ -46,7 +47,7 @@ export async function POST(
   const { data: updatedPost, error: updateError } = await supabase
     .from('posts')
     .update({ image_path: filePath })
-    .eq('id', params.id)
+    .eq('id', id)
     .select('*, client:clients(*)')
     .single()
 

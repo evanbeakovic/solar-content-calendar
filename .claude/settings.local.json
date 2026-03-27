@@ -13,7 +13,17 @@
       "Bash(echo $PATH)",
       "Bash(env)",
       "Read(//opt/pkg/env/active/**)",
-      "Read(//opt/pmk/env/global/**)"
+      "Read(//opt/pmk/env/global/**)",
+      "Bash(gh --version)",
+      "Read(//opt/homebrew/bin/**)",
+      "Read(//opt/**)",
+      "Bash(npm install:*)",
+      "Bash(git config:*)",
+      "Bash(git credential-osxkeychain:*)",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''next:'', p.dependencies.next\\)\")",
+      "Bash(ssh -T git@github.com)",
+      "Bash(echo $GITHUB_TOKEN)",
+      "Bash(npm run:*)"
     ]
   }
 }

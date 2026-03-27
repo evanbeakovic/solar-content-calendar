@@ -7,7 +7,7 @@ import ClientTable from './components/ClientTable'
 export const dynamic = 'force-dynamic'
 
 export default async function ManagerPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')

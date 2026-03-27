@@ -180,7 +180,7 @@ export default function PostCard({ post, onStatusChange }: PostCardProps) {
                 <div className="flex gap-2">
                   <button
                     onClick={handleApprove}
-                    disabled={approving || post.status === 'Confirmed'}
+                    disabled={approving}
                     className="flex-1 bg-green-600 hover:bg-green-500 text-white text-sm font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
