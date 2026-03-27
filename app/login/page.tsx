@@ -29,21 +29,25 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', data.user.id)
         .single()
 
-      if (profile) {
-        const redirectMap: Record<string, string> = {
-          smm: '/smm',
-          client: '/client',
-          manager: '/manager',
-        }
-        router.push(redirectMap[profile.role] || '/login')
-        router.refresh()
+      if (profileError || !profile) {
+        setError('Account setup incomplete. Please contact your manager, or run the profile fix SQL in Supabase.')
+        setLoading(false)
+        return
       }
+
+      const redirectMap: Record<string, string> = {
+        smm: '/smm',
+        client: '/client',
+        manager: '/manager',
+      }
+      router.push(redirectMap[profile.role] || '/login')
+      router.refresh()
     }
     setLoading(false)
   }
