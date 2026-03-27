@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:/usr/bin:$PATH\")",
+      "Read(//usr/local/bin/**)",
+      "Read(//usr/local/**)",
+      "Read(//Users/evanbeakovic/**)",
+      "Bash(command -v node)",
+      "Bash(source ~/.zshrc)",
+      "Bash(source ~/.bash_profile)",
+      "Bash(echo $PATH)",
+      "Bash(env)",
+      "Read(//opt/pkg/env/active/**)",
+      "Read(//opt/pmk/env/global/**)"
+    ]
+  }
+}
