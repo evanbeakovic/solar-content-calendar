@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
   const supabase = createClient()
 
   async function handleLogin(e: React.FormEvent) {
@@ -46,8 +44,7 @@ export default function LoginPage() {
         client: '/client',
         manager: '/manager',
       }
-      router.push(redirectMap[profile.role] || '/login')
-      router.refresh()
+      window.location.href = redirectMap[profile.role] || '/login'
     }
     setLoading(false)
   }
