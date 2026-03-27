@@ -27,14 +27,11 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single()
+      const res = await fetch('/api/auth/me')
+      const json = await res.json()
 
-      if (profileError || !profile) {
-        setError('Account setup incomplete. Please contact your manager, or run the profile fix SQL in Supabase.')
+      if (!res.ok) {
+        setError(`Profile lookup failed: ${json.error}`)
         setLoading(false)
         return
       }
@@ -44,7 +41,7 @@ export default function LoginPage() {
         client: '/client',
         manager: '/manager',
       }
-      window.location.href = redirectMap[profile.role] || '/login'
+      window.location.href = redirectMap[json.role] || '/login'
     }
     setLoading(false)
   }
