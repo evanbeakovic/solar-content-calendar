@@ -1,48 +1,61 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { addDays, startOfDay } from 'date-fns'
-import StatsCards from './components/StatsCards'
-import ClientTable from './components/ClientTable'
+import ManagerDashboardClient from './components/ManagerDashboardClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ManagerPage() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch all data
-  const [{ data: clients }, { data: posts }] = await Promise.all([
-    supabase.from('clients').select('*').order('name'),
-    supabase.from('posts').select('*'),
+  const adminSupabase = createAdminClient()
+
+  const [{ data: clients }, { data: posts }, { data: profiles }] = await Promise.all([
+    adminSupabase.from('clients').select('*').order('name'),
+    adminSupabase
+      .from('posts')
+      .select('*, client:clients(*), images:post_images(*)')
+      .order('scheduled_date', { ascending: true }),
+    adminSupabase
+      .from('profiles')
+      .select('*, clients:profile_clients(client:clients(*))')
+      .order('created_at', { ascending: false }),
   ])
 
   const allClients = clients || []
-  const allPosts = posts || []
 
-  // Calculate stats
+  // Sort images by position
+  const allPosts = (posts || []).map((post: any) => ({
+    ...post,
+    images: (post.images || []).sort((a: any, b: any) => a.position - b.position),
+  }))
+
+  // Flatten nested client structure in profiles
+  const flatProfiles = (profiles || []).map((p: any) => ({
+    ...p,
+    clients: (p.clients || []).map((pc: any) => pc.client).filter(Boolean),
+  }))
+
   const totalPosts = allPosts.length
-
-  const postsByStatus = allPosts.reduce((acc, post) => {
+  const postsByStatus = allPosts.reduce((acc: Record<string, number>, post: any) => {
     acc[post.status] = (acc[post.status] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
-  // Build per-client stats
   const today = startOfDay(new Date())
   const nextWeek = addDays(today, 7)
 
-  const clientsWithStats = allClients.map(client => {
-    const clientPosts = allPosts.filter(p => p.client_id === client.id)
-
-    const postCounts = clientPosts.reduce((acc, post) => {
+  const clientsWithStats = allClients.map((client: any) => {
+    const clientPosts = allPosts.filter((p: any) => p.client_id === client.id)
+    const postCounts = clientPosts.reduce((acc: Record<string, number>, post: any) => {
       acc[post.status] = (acc[post.status] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
-    // Flag if no Confirmed posts in the next 7 days
-    const upcomingConfirmed = clientPosts.filter(p => {
+    const upcomingConfirmed = clientPosts.filter((p: any) => {
       if (p.status !== 'Confirmed') return false
       if (!p.scheduled_date) return false
       const postDate = new Date(p.scheduled_date + 'T00:00:00')
@@ -51,33 +64,20 @@ export default async function ManagerPage() {
 
     const isFlagged = upcomingConfirmed.length === 0
 
-    return {
-      ...client,
-      postCounts,
-      totalPosts: clientPosts.length,
-      isFlagged,
-    }
+    return { ...client, postCounts, totalPosts: clientPosts.length, isFlagged }
   })
 
-  const flaggedCount = clientsWithStats.filter(c => c.isFlagged).length
+  const flaggedCount = clientsWithStats.filter((c: any) => c.isFlagged).length
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-0.5">Overview across all clients and content pipelines</p>
-      </div>
-
-      <div className="space-y-6">
-        <StatsCards
-          totalClients={allClients.length}
-          totalPosts={totalPosts}
-          postsByStatus={postsByStatus}
-          flaggedClients={flaggedCount}
-        />
-
-        <ClientTable clients={clientsWithStats} />
-      </div>
-    </div>
+    <ManagerDashboardClient
+      initialPosts={allPosts}
+      clients={allClients}
+      clientsWithStats={clientsWithStats}
+      totalPosts={totalPosts}
+      postsByStatus={postsByStatus}
+      flaggedCount={flaggedCount}
+      initialProfiles={flatProfiles}
+    />
   )
 }

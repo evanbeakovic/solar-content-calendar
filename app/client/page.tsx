@@ -1,35 +1,47 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import PostGallery from './components/PostGallery'
+import ClientPortal from './components/ClientPortal'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ClientPage() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient()
+
+  const { data: profile } = await adminClient
     .from('profiles')
-    .select('*, client:clients(*)')
+    .select('*, clients:profile_clients(client:clients(*))')
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'client' || !profile.client_id) {
-    redirect('/login')
-  }
+  if (!profile || profile.role !== 'client') redirect('/login')
 
-  const { data: posts } = await supabase
+  const clients = (profile.clients || [])
+    .map((pc: any) => pc.client)
+    .filter(Boolean)
+
+  if (clients.length === 0) redirect('/login')
+
+  const clientIds = clients.map((c: any) => c.id)
+
+  const { data: posts } = await adminClient
     .from('posts')
-    .select('*, client:clients(*)')
-    .eq('client_id', profile.client_id)
+    .select('*, client:clients(*), images:post_images(*)')
+    .in('client_id', clientIds)
     .order('scheduled_date', { ascending: true })
 
+  const sortedPosts = (posts || [])
+  sortedPosts.forEach(p => p.images?.sort((a: any, b: any) => a.position - b.position))
+
   return (
-    <PostGallery
-      initialPosts={posts || []}
-      clientName={profile.client?.name || 'Your Brand'}
+    <ClientPortal
+      initialPosts={sortedPosts}
+      clients={clients}
+      profile={profile}
     />
   )
 }

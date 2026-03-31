@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Client } from '@/lib/types'
 import { format } from 'date-fns'
 
@@ -13,14 +14,68 @@ interface ClientTableProps {
   clients: ClientWithStats[]
 }
 
-const STATUS_ORDER = ['To Be Confirmed', 'Being Created', 'Confirmed', 'Scheduled', 'Posted']
+const STATUS_ORDER = ['Uploads', 'Being Created', 'To Be Confirmed', 'Requested Changes', 'Confirmed', 'Scheduled', 'Posted']
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
-  'To Be Confirmed': 'bg-gray-100 text-gray-600',
-  'Being Created': 'bg-blue-100 text-blue-700',
-  'Confirmed': 'bg-green-100 text-green-700',
-  'Scheduled': 'bg-yellow-100 text-yellow-700',
-  'Posted': 'bg-purple-100 text-purple-700',
+  'Uploads':           'bg-slate-100 text-slate-600',
+  'Being Created':     'bg-blue-100 text-blue-700',
+  'To Be Confirmed':   'bg-gray-100 text-gray-600',
+  'Requested Changes': 'bg-amber-100 text-amber-700',
+  'Confirmed':         'bg-green-100 text-green-700',
+  'Scheduled':         'bg-yellow-100 text-yellow-700',
+  'Posted':            'bg-purple-100 text-purple-700',
+}
+
+function FlagBadge({ client }: { client: ClientWithStats }) {
+  const [show, setShow] = useState(false)
+
+  if (!client.isFlagged) {
+    return (
+      <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={() => setShow(v => !v)}
+        className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full hover:bg-red-200 transition-colors"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/>
+        </svg>
+        Alert
+      </button>
+
+      {show && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setShow(false)} />
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 z-20 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-gray-900">⚠️ {client.name}</span>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              This client has <strong>no Confirmed posts</strong> scheduled in the next 7 days. Review their content pipeline and ensure posts are approved and scheduled.
+            </p>
+            <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+              <div className="text-center">
+                <div className="text-lg font-bold text-gray-900">{client.totalPosts}</div>
+                <div className="text-xs text-gray-400">Total posts</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-green-600">{client.postCounts['Confirmed'] || 0}</div>
+                <div className="text-xs text-gray-400">Confirmed</div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 export default function ClientTable({ clients }: ClientTableProps) {
@@ -68,7 +123,6 @@ export default function ClientTable({ clients }: ClientTableProps) {
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{client.name}</div>
-                      <div className="text-xs text-gray-400 font-mono">{client.slug}</div>
                     </div>
                   </div>
                 </td>
@@ -87,20 +141,7 @@ export default function ClientTable({ clients }: ClientTableProps) {
                   </td>
                 ))}
                 <td className="px-4 py-4 text-center">
-                  {client.isFlagged ? (
-                    <div className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/>
-                      </svg>
-                      Alert
-                    </div>
-                  ) : (
-                    <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </div>
-                  )}
+                  <FlagBadge client={client} />
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm text-gray-400">

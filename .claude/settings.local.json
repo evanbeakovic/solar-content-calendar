@@ -23,7 +23,14 @@
       "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''next:'', p.dependencies.next\\)\")",
       "Bash(ssh -T git@github.com)",
       "Bash(echo $GITHUB_TOKEN)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://api.github.com/users/evanbeakovic)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(find '/Users/evanbeakovic/Desktop/Solar Content Calender' -name *.sql -o -name *migration*)"
+    ],
+    "additionalDirectories": [
+      "/Users/evanbeakovic/Desktop/Solar Content Calender/app/api/clients/[id]"
     ]
   }
 }

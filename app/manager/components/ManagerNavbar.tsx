@@ -1,18 +1,27 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Profile } from '@/lib/types'
-import Link from 'next/link'
 
 interface ManagerNavbarProps {
   profile: Profile
 }
 
+type Section = 'dashboard' | 'content' | 'users'
+
+const NAV_ITEMS: { id: Section; label: string }[] = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'content',   label: 'Content' },
+  { id: 'users',     label: 'Users' },
+]
+
 export default function ManagerNavbar({ profile }: ManagerNavbarProps) {
   const router = useRouter()
-  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  const activeSection = (searchParams.get('section') || 'dashboard') as Section
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -20,10 +29,9 @@ export default function ManagerNavbar({ profile }: ManagerNavbarProps) {
     router.refresh()
   }
 
-  const navLinks = [
-    { href: '/manager', label: 'Dashboard' },
-    { href: '/manager/users', label: 'Users' },
-  ]
+  function handleNav(section: Section) {
+    router.push(`/manager?section=${section}`)
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#10375C] text-white h-16 flex items-center px-6 shadow-lg">
@@ -38,20 +46,20 @@ export default function ManagerNavbar({ profile }: ManagerNavbarProps) {
         <span className="text-[#8EE3E3] text-xs font-medium bg-[#8EE3E3] bg-opacity-10 px-2 py-0.5 rounded-full border border-[#8EE3E3] border-opacity-20">Manager</span>
       </div>
 
-      {/* Nav links */}
+      {/* Nav items */}
       <div className="ml-8 flex items-center gap-1">
-        {navLinks.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.id}
+            onClick={() => handleNav(item.id)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              pathname === link.href
+              activeSection === item.id
                 ? 'bg-white bg-opacity-15 text-white'
                 : 'text-gray-400 hover:text-white hover:bg-white hover:bg-opacity-10'
             }`}
           >
-            {link.label}
-          </Link>
+            {item.label}
+          </button>
         ))}
       </div>
 

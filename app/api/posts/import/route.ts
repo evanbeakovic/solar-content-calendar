@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 interface ImportPost {
@@ -16,33 +17,18 @@ interface ImportPost {
   visual_direction?: string
 }
 
-export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Check role
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'smm') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
-
-  const body = await request.json()
-  const { posts } = body as { posts: ImportPost[] }
-
-  if (!Array.isArray(posts) || posts.length === 0) {
-    return NextResponse.json({ error: 'No posts provided' }, { status: 400 })
-  }
-
-  const postsToInsert = posts.map(post => ({
+function normalizePost(post: ImportPost) {
+  return {
     client_id: post.client_id,
-    scheduled_date: post.scheduled_date || null,
+    scheduled_date: (() => {
+      const raw = post.scheduled_date || ''
+      if (!raw) return null
+      const parts = raw.split('/')
+      if (parts.length === 3 && parts[0].length <= 2) {
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+      }
+      return raw || null
+    })(),
     platform: post.platform || null,
     format: post.format || null,
     content_pillar: post.content_pillar || null,
@@ -53,15 +39,90 @@ export async function POST(request: Request) {
     hashtags: post.hashtags || null,
     background_color: post.background_color || null,
     visual_direction: post.visual_direction || null,
-    status: 'To Be Confirmed' as const,
-  }))
+    status: 'Uploads' as const,
+  }
+}
 
-  const { data, error } = await supabase
-    .from('posts')
-    .insert(postsToInsert)
-    .select()
+export async function POST(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const adminClient = createAdminClient()
 
-  return NextResponse.json({ created: data.length, posts: data }, { status: 201 })
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !['smm', 'manager'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const body = await request.json()
+  const { posts, forceDuplicate } = body as { posts: ImportPost[]; forceDuplicate?: boolean }
+
+  if (!Array.isArray(posts) || posts.length === 0) {
+    return NextResponse.json({ error: 'No posts provided' }, { status: 400 })
+  }
+
+  const postsToProcess = posts.map(normalizePost)
+
+  // If forceDuplicate, skip duplicate check and insert all
+  if (forceDuplicate) {
+    const { data, error } = await adminClient
+      .from('posts')
+      .insert(postsToProcess)
+      .select('*, client:clients(*)')
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ inserted: data.length, posts: data, duplicates: [] }, { status: 201 })
+  }
+
+  // Duplicate detection: check by client_id + scheduled_date + platform + headline
+  const nonDuplicates: typeof postsToProcess = []
+  const duplicates: (typeof postsToProcess[0] & { existing_id: string })[] = []
+
+  for (const post of postsToProcess) {
+    let query = adminClient
+      .from('posts')
+      .select('id')
+      .eq('client_id', post.client_id)
+
+    if (post.scheduled_date) {
+      query = query.eq('scheduled_date', post.scheduled_date)
+    }
+    if (post.platform) {
+      query = query.eq('platform', post.platform)
+    }
+    if (post.headline) {
+      query = query.eq('headline', post.headline)
+    }
+
+    const { data: existing } = await query.limit(1)
+
+    if (existing && existing.length > 0) {
+      duplicates.push({ ...post, existing_id: existing[0].id })
+    } else {
+      nonDuplicates.push(post)
+    }
+  }
+
+  // Insert only non-duplicates
+  let insertedPosts: any[] = []
+  if (nonDuplicates.length > 0) {
+    const { data, error } = await adminClient
+      .from('posts')
+      .insert(nonDuplicates)
+      .select('*, client:clients(*)')
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    insertedPosts = data || []
+  }
+
+  return NextResponse.json(
+    { inserted: insertedPosts.length, posts: insertedPosts, duplicates },
+    { status: 201 }
+  )
 }

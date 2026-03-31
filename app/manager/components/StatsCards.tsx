@@ -1,10 +1,19 @@
 'use client'
 
+import { useState } from 'react'
+
+interface ClientWithStats {
+  id: string
+  name: string
+  isFlagged: boolean
+}
+
 interface StatsCardsProps {
   totalClients: number
   totalPosts: number
   postsByStatus: Record<string, number>
   flaggedClients: number
+  flaggedClientList: ClientWithStats[]
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
@@ -15,11 +24,19 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; icon: string }> 
   'Posted': { bg: 'bg-purple-50', text: 'text-purple-700', icon: '🚀' },
 }
 
-export default function StatsCards({ totalClients, totalPosts, postsByStatus, flaggedClients }: StatsCardsProps) {
+export default function StatsCards({
+  totalClients,
+  totalPosts,
+  postsByStatus,
+  flaggedClients,
+  flaggedClientList,
+}: StatsCardsProps) {
+  const [showFlagPopover, setShowFlagPopover] = useState(false)
+
   return (
     <div className="space-y-6">
-      {/* Top row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Clients */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#10375C] bg-opacity-10 flex items-center justify-center">
@@ -34,6 +51,7 @@ export default function StatsCards({ totalClients, totalPosts, postsByStatus, fl
           <div className="text-sm text-gray-500 mt-1">Total Clients</div>
         </div>
 
+        {/* Total Posts */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#8EE3E3] bg-opacity-20 flex items-center justify-center">
@@ -48,6 +66,7 @@ export default function StatsCards({ totalClients, totalPosts, postsByStatus, fl
           <div className="text-sm text-gray-500 mt-1">Total Posts</div>
         </div>
 
+        {/* Confirmed Posts */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
@@ -60,19 +79,65 @@ export default function StatsCards({ totalClients, totalPosts, postsByStatus, fl
           <div className="text-sm text-gray-500 mt-1">Confirmed Posts</div>
         </div>
 
-        <div className={`rounded-2xl p-6 border shadow-sm ${flaggedClients > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${flaggedClients > 0 ? 'bg-red-100' : 'bg-gray-50'}`}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={flaggedClients > 0 ? '#dc2626' : '#9ca3af'} strokeWidth="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/>
-              </svg>
+        {/* Flagged Clients — interactive */}
+        <div className="relative">
+          <button
+            onClick={() => setShowFlagPopover(v => !v)}
+            className={`w-full text-left rounded-2xl p-6 border shadow-sm transition-all ${
+              flaggedClients > 0
+                ? 'bg-red-50 border-red-200 hover:bg-red-100'
+                : 'bg-white border-gray-100 hover:bg-gray-50'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${flaggedClients > 0 ? 'bg-red-100' : 'bg-gray-50'}`}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={flaggedClients > 0 ? '#dc2626' : '#9ca3af'} strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/>
+                </svg>
+              </div>
+              {flaggedClients > 0 && (
+                <span className="text-xs text-red-400 font-medium">Click for details</span>
+              )}
             </div>
-          </div>
-          <div className={`text-3xl font-bold ${flaggedClients > 0 ? 'text-red-700' : 'text-gray-900'}`}>{flaggedClients}</div>
-          <div className={`text-sm mt-1 ${flaggedClients > 0 ? 'text-red-600' : 'text-gray-500'}`}>
-            Clients Flagged
-            <span className="block text-xs opacity-70">0 confirmed posts this week</span>
-          </div>
+            <div className={`text-3xl font-bold ${flaggedClients > 0 ? 'text-red-700' : 'text-gray-900'}`}>
+              {flaggedClients}
+            </div>
+            <div className={`text-sm mt-1 ${flaggedClients > 0 ? 'text-red-600' : 'text-gray-500'}`}>
+              Clients Flagged
+              <span className="block text-xs opacity-70">No confirmed posts this week</span>
+            </div>
+          </button>
+
+          {/* Popover */}
+          {showFlagPopover && flaggedClients > 0 && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowFlagPopover(false)} />
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900 text-sm">⚠️ Flagged Clients</h4>
+                  <button onClick={() => setShowFlagPopover(false)} className="text-gray-400 hover:text-gray-600">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mb-3 pb-3 border-b border-gray-100">
+                  These clients have no posts with <strong>Confirmed</strong> status scheduled in the next 7 days.
+                </p>
+                <div className="space-y-2">
+                  {flaggedClientList.filter(c => c.isFlagged).map(client => (
+                    <div key={client.id} className="flex items-center gap-2.5 py-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-700 font-bold text-xs flex-shrink-0">
+                        {client.name[0]}
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">{client.name}</span>
+                      <span className="ml-auto text-xs text-red-500 font-medium">No posts</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

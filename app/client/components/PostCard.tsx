@@ -1,256 +1,276 @@
 'use client'
 
-import { useState } from 'react'
-import { Post, PostStatus } from '@/lib/types'
+import { Post } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
-import Image from 'next/image'
 import { format } from 'date-fns'
 
-interface PostCardProps {
+interface ClientPostCardProps {
   post: Post
-  onStatusChange: (postId: string, newStatus: PostStatus) => void
+  onClick: () => void
+  onApprove: (postId: string) => void
+  onRequestChanges: (post: Post) => void
+  theme: 'dark' | 'light'
+  approvingId?: string | null
 }
 
-const STATUS_STYLES: Record<PostStatus, { bg: string; text: string; dot: string }> = {
-  'To Be Confirmed': { bg: 'bg-gray-800', text: 'text-gray-300', dot: 'bg-gray-500' },
-  'Being Created': { bg: 'bg-blue-900 bg-opacity-60', text: 'text-blue-300', dot: 'bg-blue-400' },
-  'Confirmed': { bg: 'bg-green-900 bg-opacity-60', text: 'text-green-300', dot: 'bg-green-400' },
-  'Scheduled': { bg: 'bg-yellow-900 bg-opacity-60', text: 'text-yellow-300', dot: 'bg-yellow-400' },
-  'Posted': { bg: 'bg-purple-900 bg-opacity-60', text: 'text-purple-300', dot: 'bg-purple-400' },
+const STATUS_DOT: Record<string, string> = {
+  'Uploads':           'bg-slate-400',
+  'To Be Confirmed':   'bg-amber-400',
+  'Being Created':     'bg-amber-400',
+  'Requested Changes': 'bg-orange-400',
+  'Confirmed':         'bg-green-400',
+  'Scheduled':         'bg-purple-400',
+  'Posted':            'bg-blue-400',
 }
 
-const PLATFORM_ICONS: Record<string, string> = {
-  Instagram: '📷',
-  Facebook: '👥',
-  LinkedIn: '💼',
-  Twitter: '🐦',
-  TikTok: '🎵',
-}
-
-export default function PostCard({ post, onStatusChange }: PostCardProps) {
+export default function ClientPostCard({
+  post,
+  onClick,
+  onApprove,
+  onRequestChanges,
+  theme,
+  approvingId,
+}: ClientPostCardProps) {
   const supabase = createClient()
-  const [showRequestForm, setShowRequestForm] = useState(false)
-  const [changeRequest, setChangeRequest] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [approving, setApproving] = useState(false)
+  const isDark = theme === 'dark'
 
-  const getImageUrl = () => {
-    if (!post.image_path) return null
-    const { data } = supabase.storage.from('post-images').getPublicUrl(post.image_path)
-    return data.publicUrl
+  const sortedImages = (post.images || []).slice().sort((a, b) => a.position - b.position)
+  const firstImage = sortedImages[0] || null
+  const imageCount = sortedImages.length
+
+  function getImageUrl(path: string | null) {
+    if (!path) return null
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path
+    return `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
   }
 
-  const imageUrl = getImageUrl()
-  const statusStyle = STATUS_STYLES[post.status]
+  const imageUrl = getImageUrl(firstImage?.path || post.image_path || null)
 
-  async function handleApprove() {
-    setApproving(true)
-    const response = await fetch(`/api/posts/${post.id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Confirmed' }),
-    })
-    if (response.ok) {
-      onStatusChange(post.id, 'Confirmed')
-    }
-    setApproving(false)
-  }
+  const platforms = post.platform ? post.platform.split(' + ') : []
+  const platformLabel = platforms.length > 2
+    ? `${platforms[0]} +${platforms.length - 1}`
+    : platforms.join(' + ')
+  const badgeLabel = platformLabel && post.format
+    ? `${platformLabel} · ${post.format}`
+    : platformLabel || post.format || null
 
-  async function handleSubmitRequest() {
-    if (!changeRequest.trim()) return
-    setSubmitting(true)
+  const isStory = post.format === 'Story'
+  const isCarousel = post.format === 'Carousel'
+  const isMulti = isCarousel || isStory
 
-    await fetch(`/api/posts/${post.id}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: changeRequest }),
-    })
+  const isAwaiting = post.status === 'To Be Confirmed'
+  const isRequestedChanges = post.status === 'Requested Changes'
+  const isConfirmed = post.status === 'Confirmed'
+  const isScheduled = post.status === 'Scheduled'
+  const isPosted = post.status === 'Posted'
+  // Badge: being worked on after a change request
+  const isBeingWorkedOn = (post.status === 'Being Created') && !!post.change_request_note
 
-    setSubmitted(true)
-    setSubmitting(false)
-    setChangeRequest('')
-    setTimeout(() => {
-      setShowRequestForm(false)
-      setSubmitted(false)
-    }, 2000)
-  }
+  const approving = approvingId === post.id
 
   return (
-    <div className="bg-[#111111] border border-white border-opacity-10 rounded-2xl overflow-hidden hover:border-opacity-20 transition-all group">
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-[#1a1a1a]">
+    <div
+      className={`rounded-2xl overflow-hidden border transition-all group cursor-pointer flex flex-col ${
+        isDark
+          ? 'bg-[#111827] border-white/[0.07] hover:border-white/[0.18]'
+          : 'bg-white border-black/[0.07] hover:border-black/[0.15] shadow-sm hover:shadow-md'
+      }`}
+      onClick={onClick}
+    >
+      {/* Image area */}
+      <div
+        className={`relative overflow-hidden flex-shrink-0 ${
+          isStory ? 'aspect-[9/16] max-h-[200px]' : 'h-40'
+        }`}
+      >
         {imageUrl ? (
-          <Image
+          <img
             src={imageUrl}
             alt={post.headline || 'Post'}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center"
-            style={{ backgroundColor: post.background_color || '#1a1a1a' }}
+            style={{ backgroundColor: post.background_color || (isDark ? '#1a2436' : '#e5e7eb') }}
           >
-            <div className="text-center p-6 opacity-40">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1" className="mx-auto mb-2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-              <p className="text-white text-xs">No image yet</p>
-            </div>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#374151' : '#9ca3af'} strokeWidth="1">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
           </div>
         )}
 
-        {/* Status badge overlay */}
-        <div className="absolute top-3 left-3">
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${statusStyle.bg} ${statusStyle.text}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`}></div>
-            {post.status}
+        {/* Platform badge — top left */}
+        {badgeLabel && (
+          <div className="absolute top-2.5 left-2.5">
+            <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded-full">
+              {badgeLabel}
+            </span>
           </div>
+        )}
+
+        {/* Status dot — top right */}
+        <div className="absolute top-3 right-3">
+          <div className={`w-2 h-2 rounded-full shadow-sm ${STATUS_DOT[post.status] || 'bg-gray-400'}`} />
         </div>
 
-        {/* Platform badge */}
-        {post.platform && (
-          <div className="absolute top-3 right-3 bg-black bg-opacity-60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-            {PLATFORM_ICONS[post.platform] || '📱'} {post.platform}
+        {/* Image count badge — bottom right (multi) */}
+        {isMulti && imageCount > 1 && (
+          <div className="absolute bottom-2 right-2">
+            <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+              1 / {imageCount}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-5">
-        {/* Visual Direction */}
-        {post.visual_direction && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-1">Visual Direction</p>
-            <p className="text-gray-300 text-sm leading-relaxed">{post.visual_direction}</p>
-          </div>
-        )}
-
-        {/* Headline */}
-        {post.headline && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-1">Headline</p>
-            <p className="text-white font-semibold text-base leading-snug">{post.headline}</p>
-          </div>
-        )}
-
-        {/* Caption */}
-        {post.caption && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-1">Caption</p>
-            <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">{post.caption}</p>
-          </div>
-        )}
-
-        {/* CTA */}
-        {post.cta && (
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-1">Call to Action</p>
-            <div className="inline-flex items-center gap-1.5 bg-[#8EE3E3] bg-opacity-10 border border-[#8EE3E3] border-opacity-20 text-[#8EE3E3] text-sm px-3 py-1 rounded-full">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-              {post.cta}
-            </div>
-          </div>
-        )}
-
-        {/* Date */}
+      {/* Card body */}
+      <div className="p-3.5 flex flex-col flex-1">
         {post.scheduled_date && (
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
+          <p className={`text-[11px] mb-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+            {format(new Date(post.scheduled_date + 'T00:00:00'), 'MMM d, yyyy')}
+          </p>
+        )}
+        {post.headline && (
+          <p className={`text-sm font-semibold leading-snug mb-1.5 line-clamp-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {post.headline}
+          </p>
+        )}
+
+        {/* "Request fixed ✓" badge — shown when SMM has marked the request as fixed */}
+        {post.change_request_fixed === true && post.change_request_note && (
+          <div className={`mb-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border ${
+            isDark ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'
+          }`}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#4ade80' : '#16a34a'} strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12"/>
             </svg>
-            Scheduled: {format(new Date(post.scheduled_date + 'T00:00:00'), 'MMMM d, yyyy')}
+            <p className={`text-[11px] font-medium ${isDark ? 'text-green-400' : 'text-green-700'}`}>Request fixed ✓</p>
           </div>
         )}
 
-        {/* Divider */}
-        <div className="border-t border-white border-opacity-5 pt-4">
-          {/* Action buttons */}
-          {post.status !== 'Confirmed' && post.status !== 'Posted' && (
-            <div className="space-y-2">
-              {!showRequestForm && !submitted && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleApprove}
-                    disabled={approving}
-                    className="flex-1 bg-green-600 hover:bg-green-500 text-white text-sm font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    {approving ? 'Approving...' : 'Approve'}
-                  </button>
-                  <button
-                    onClick={() => setShowRequestForm(true)}
-                    className="flex-1 border border-red-500 border-opacity-50 text-red-400 hover:bg-red-500 hover:bg-opacity-10 text-sm font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                    </svg>
-                    Request Changes
-                  </button>
-                </div>
-              )}
+        {/* "We are working on your request" badge — only when NOT yet fixed */}
+        {isBeingWorkedOn && !post.change_request_fixed && (
+          <div className="mb-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <p className="text-[11px] text-amber-500 font-medium">We are working on your request...</p>
+          </div>
+        )}
 
-              {showRequestForm && !submitted && (
-                <div className="space-y-2">
-                  <textarea
-                    value={changeRequest}
-                    onChange={(e) => setChangeRequest(e.target.value)}
-                    placeholder="Describe the changes you'd like..."
-                    rows={3}
-                    className="w-full bg-[#1a1a1a] border border-white border-opacity-10 text-white text-sm px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#8EE3E3] focus:border-opacity-40 resize-none placeholder-gray-600"
-                    autoFocus
+        {/* Change request note (shown in Changes Requested tab) */}
+        {isRequestedChanges && post.change_request_note && (
+          <div className={`mb-2 p-2.5 rounded-lg border ${
+            isDark
+              ? 'bg-amber-500/10 border-amber-500/20'
+              : 'bg-amber-50 border-amber-200'
+          }`}>
+            <p className={`text-xs leading-relaxed ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>
+              {post.change_request_note}
+            </p>
+          </div>
+        )}
+
+        {/* Change request image thumbnails */}
+        {isRequestedChanges && post.change_request_images && post.change_request_images.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap mb-2" onClick={e => e.stopPropagation()}>
+            {post.change_request_images.map((path, i) => {
+              const url = getImageUrl(path)
+              return url ? (
+                <button
+                  key={i}
+                  onClick={() => window.open(url, '_blank')}
+                  className="focus:outline-none"
+                >
+                  <img
+                    src={url}
+                    alt={`Reference ${i + 1}`}
+                    className="w-12 h-12 object-cover rounded-lg border border-amber-500/20 hover:opacity-80 transition-opacity cursor-pointer"
                   />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => { setShowRequestForm(false); setChangeRequest('') }}
-                      className="flex-1 border border-white border-opacity-10 text-gray-400 hover:text-gray-300 text-sm py-2 rounded-xl transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSubmitRequest}
-                      disabled={submitting || !changeRequest.trim()}
-                      className="flex-1 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold py-2 rounded-xl transition-all disabled:opacity-50"
-                    >
-                      {submitting ? 'Sending...' : 'Send Request'}
-                    </button>
-                  </div>
-                </div>
-              )}
+                </button>
+              ) : null
+            })}
+          </div>
+        )}
 
-              {submitted && (
-                <div className="flex items-center justify-center gap-2 text-green-400 text-sm py-2 bg-green-500 bg-opacity-10 rounded-xl border border-green-500 border-opacity-20">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  Change request sent!
-                </div>
-              )}
-            </div>
+        {post.caption && !isRequestedChanges && (
+          <p className={`text-xs leading-relaxed line-clamp-2 mb-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+            {post.caption}
+          </p>
+        )}
+
+        {/* Action buttons — stop propagation so they don't open detail panel */}
+        <div
+          className="flex gap-2 mt-auto"
+          onClick={e => e.stopPropagation()}
+        >
+          {isAwaiting && (
+            <>
+              <button
+                onClick={() => onApprove(post.id)}
+                disabled={approving}
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20 transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {approving ? '...' : 'Approve'}
+              </button>
+              <button
+                onClick={() => onRequestChanges(post)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 ${
+                  isDark
+                    ? 'border-white/10 text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                    : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                }`}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+                Changes
+              </button>
+            </>
           )}
 
-          {post.status === 'Confirmed' && (
-            <div className="flex items-center justify-center gap-2 text-green-400 text-sm py-2 bg-green-500 bg-opacity-10 rounded-xl border border-green-500 border-opacity-20">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          {isRequestedChanges && (
+            <button
+              onClick={() => onRequestChanges(post)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 ${
+                isDark
+                  ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
+                  : 'border-amber-300 text-amber-700 hover:bg-amber-50'
+              }`}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Edit request
+            </button>
+          )}
+
+          {isConfirmed && (
+            <div className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center gap-1">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
               Approved
             </div>
           )}
 
-          {post.status === 'Posted' && (
-            <div className="flex items-center justify-center gap-2 text-purple-400 text-sm py-2 bg-purple-500 bg-opacity-10 rounded-xl border border-purple-500 border-opacity-20">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          {isScheduled && (
+            <div className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center gap-1">
+              Scheduled
+            </div>
+          )}
+
+          {isPosted && (
+            <div className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center gap-1">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
               </svg>
               Published

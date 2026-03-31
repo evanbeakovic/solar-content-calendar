@@ -18,9 +18,9 @@ export default function CreateUserModal({ clients, onClose, onCreated }: CreateU
     password: '',
     full_name: '',
     role: 'client' as 'smm' | 'client' | 'manager',
-    client_id: '',
   })
-
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
+  
   function handleChange(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
   }
@@ -33,7 +33,7 @@ export default function CreateUserModal({ clients, onClose, onCreated }: CreateU
     const response = await fetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, client_ids: selectedClientIds }),
     })
 
     if (response.ok) {
@@ -137,18 +137,37 @@ export default function CreateUserModal({ clients, onClose, onCreated }: CreateU
             {/* Client assignment (only for client role) */}
             {form.role === 'client' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Assign to Client</label>
-                <select
-                  value={form.client_id}
-                  onChange={(e) => handleChange('client_id', e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white"
-                >
-                  <option value="">No client assigned</option>
-                  {clients.map(client => (
-                    <option key={client.id} value={client.id}>{client.name}</option>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Assign to Clients <span className="text-gray-300 font-normal">(select one or more)</span>
+                </label>
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-2">
+                  {clients.map(c => (
+                    <label key={c.id} className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedClientIds.includes(c.id)}
+                        onChange={() => {
+                          setSelectedClientIds(prev =>
+                            prev.includes(c.id)
+                              ? prev.filter(x => x !== c.id)
+                              : [...prev, c.id]
+                          )
+                        }}
+                        className="w-4 h-4 rounded accent-[#10375C]"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-md bg-[#10375C]/10 flex items-center justify-center text-[#10375C] text-xs font-bold">
+                          {c.name[0]}
+                        </div>
+                        <span className="text-sm text-gray-700">{c.name}</span>
+                      </div>
+                    </label>
                   ))}
-                </select>
-                <p className="text-xs text-gray-400 mt-1">The client account will only see posts for the assigned client.</p>
+                  {clients.length === 0 && (
+                    <p className="text-xs text-gray-400 text-center py-2">No clients created yet</p>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">The client account will only see posts for assigned clients.</p>
               </div>
             )}
 

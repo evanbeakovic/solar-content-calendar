@@ -1,10 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { PostStatus } from '@/lib/types'
 
 const VALID_STATUSES: PostStatus[] = [
-  'To Be Confirmed',
+  'Uploads',
   'Being Created',
+  'To Be Confirmed',
+  'Requested Changes',
   'Confirmed',
   'Scheduled',
   'Posted',
@@ -16,7 +19,6 @@ export async function PATCH(
 ) {
   const { id } = await params
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -27,7 +29,8 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  const adminClient = createAdminClient()
+  const { data, error } = await adminClient
     .from('posts')
     .update({ status })
     .eq('id', id)
@@ -35,6 +38,5 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   return NextResponse.json(data)
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Client, Post } from '@/lib/types'
 
 interface NewPostModalProps {
@@ -10,15 +10,20 @@ interface NewPostModalProps {
 }
 
 const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'Twitter', 'TikTok']
-const FORMATS = ['Single Image', 'Carousel', 'Story', 'Reel', 'Video']
+const FORMATS = ['Post', 'Carousel', 'Story', 'Reel', 'Video']
+
+function getPlatformLabel(platforms: string[], format: string): string {
+  if (platforms.length === 0) return ''
+  return `${platforms.join(' + ')} ${format}`
+}
 
 export default function NewPostModal({ clients, onClose, onCreated }: NewPostModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['Instagram', 'Facebook'])
   const [form, setForm] = useState({
     client_id: '',
     scheduled_date: '',
-    platform: '',
     format: '',
     content_pillar: '',
     headline: '',
@@ -30,16 +35,31 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
     visual_direction: '',
   })
 
+  // Auto-dismiss error after 6 seconds
+  useEffect(() => {
+    if (!error) return
+    const timer = setTimeout(() => setError(''), 6000)
+    return () => clearTimeout(timer)
+  }, [error])
+
   function handleChange(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
+    if (error) setError('')
   }
+
+  function togglePlatform(p: string) {
+    setSelectedPlatforms(prev =>
+      prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
+    )
+  }
+
+  const isVideo = form.format === 'Reel' || form.format === 'Video'
+  const isCarousel = form.format === 'Carousel'
+  const acceptAttr = isVideo ? 'video/*' : 'image/*'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.client_id) {
-      setError('Please select a client')
-      return
-    }
+    if (!form.client_id) { setError('Please select a client'); return }
 
     setLoading(true)
     setError('')
@@ -47,7 +67,10 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
     const response = await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        platform: selectedPlatforms.join(' + '),
+      }),
     })
 
     if (response.ok) {
@@ -62,11 +85,15 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Create New Post</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Status will be set to "To Be Confirmed"</p>
+            {selectedPlatforms.length > 0 && form.format && (
+              <p className="text-xs text-[#10375C] font-semibold mt-0.5">
+                {getPlatformLabel(selectedPlatforms, form.format)}
+              </p>
+            )}
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -75,6 +102,17 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
           </button>
         </div>
 
+        {/* Error banner — always visible, outside scrollable area */}
+        {error && (
+          <div className="mx-6 mt-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium flex items-start gap-2 flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {error}
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto">
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Client */}
           <div>
@@ -92,7 +130,25 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
             </select>
           </div>
 
-          {/* Row: Date + Platform */}
+          {/* Platforms */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Platform</label>
+            <div className="flex flex-wrap gap-2">
+              {PLATFORMS.map(p => (
+                <label key={p} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={selectedPlatforms.includes(p)}
+                    onChange={() => togglePlatform(p)}
+                    className="w-4 h-4 rounded accent-[#10375C]"
+                  />
+                  <span className="text-sm text-gray-700">{p}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Row: Date + Format */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Scheduled Date</label>
@@ -104,21 +160,6 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Platform</label>
-              <select
-                value={form.platform}
-                onChange={(e) => handleChange('platform', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white"
-              >
-                <option value="">Select platform...</option>
-                {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Row: Format + Content Pillar */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Format</label>
               <select
                 value={form.format}
@@ -129,16 +170,27 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
                 {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Content Pillar</label>
-              <input
-                type="text"
-                value={form.content_pillar}
-                onChange={(e) => handleChange('content_pillar', e.target.value)}
-                placeholder="e.g. Education, Promotion"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900"
-              />
+          </div>
+
+          {/* Format hint */}
+          {form.format && (
+            <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-blue-700 font-medium">
+              {isVideo && '🎬 Video format selected — only video files can be uploaded for this post'}
+              {isCarousel && '🖼 Carousel selected — you can upload multiple images after creating the post'}
+              {!isVideo && !isCarousel && '🖼 Single file upload available after creating the post'}
             </div>
+          )}
+
+          {/* Content Pillar */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Content Pillar</label>
+            <input
+              type="text"
+              value={form.content_pillar}
+              onChange={(e) => handleChange('content_pillar', e.target.value)}
+              placeholder="e.g. Education, Promotion"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900"
+            />
           </div>
 
           {/* Headline */}
@@ -196,7 +248,7 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
               type="text"
               value={form.hashtags}
               onChange={(e) => handleChange('hashtags', e.target.value)}
-              placeholder="#solar #energy #renewable"
+              placeholder="#brand #marketing"
               className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900"
             />
           </div>
@@ -217,6 +269,7 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
                   value={form.background_color}
                   onChange={(e) => handleChange('background_color', e.target.value)}
                   className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 font-mono text-sm"
+                  placeholder="#ffffff"
                 />
               </div>
             </div>
@@ -232,29 +285,16 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
             </div>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-              {error}
-            </div>
-          )}
-
           <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-            >
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-[#10375C] text-white font-semibold hover:bg-[#0d2d4a] transition-all disabled:opacity-50 shadow-lg shadow-[#10375C]/20"
-            >
+            <button type="submit" disabled={loading} className="flex-1 py-2.5 rounded-xl bg-[#10375C] text-white font-semibold hover:bg-[#0d2d4a] transition-all disabled:opacity-50 shadow-lg shadow-[#10375C]/20">
               {loading ? 'Creating...' : 'Create Post'}
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )

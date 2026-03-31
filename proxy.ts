@@ -1,10 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,12 +26,17 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Use service role key to bypass RLS for profile lookups
+  const adminSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   const { pathname } = request.nextUrl
 
-  // Public routes
   if (pathname === '/login' || pathname === '/') {
     if (user) {
-      const { data: profile } = await supabase
+      const { data: profile } = await adminSupabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -50,12 +54,11 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Protected routes
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await adminSupabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
