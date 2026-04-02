@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import SMMNavbar from './components/SMMNavbar'
+import SMMShell from './components/SMMShell'
 
 export default async function SMMLayout({
   children,
@@ -22,11 +22,8 @@ export default async function SMMLayout({
   if (!profile || profile.role !== 'smm') redirect('/login')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <SMMNavbar profile={profile} />
-      <main className="pt-16">
-        {children}
-      </main>
-    </div>
+    <SMMShell profile={profile}>
+      {children}
+    </SMMShell>
   )
 }

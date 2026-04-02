@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Post, Client, PostStatus } from '@/lib/types'
 import { format } from 'date-fns'
 import ClientPostCard from './PostCard'
+import { getAspectRatioForPost, aspectRatioToCSS } from '@/lib/postFormats'
 
 type TabKey = 'awaiting' | 'changes' | 'approved' | 'scheduled' | 'published'
 
@@ -21,6 +22,9 @@ interface ContentViewProps {
   activeClientIds: string[]
   theme: 'dark' | 'light'
   onPostUpdated: (post: Post) => void
+  pendingTab?: string
+  onTabConsumed?: () => void
+  readOnly?: boolean
 }
 
 export default function ContentView({
@@ -29,10 +33,20 @@ export default function ContentView({
   activeClientIds,
   theme,
   onPostUpdated,
+  pendingTab,
+  onTabConsumed,
+  readOnly = false,
 }: ContentViewProps) {
   const isDark = theme === 'dark'
 
   const [activeTab, setActiveTab] = useState<TabKey>('awaiting')
+
+  useEffect(() => {
+    if (pendingTab) {
+      setActiveTab(pendingTab as TabKey)
+      onTabConsumed?.()
+    }
+  }, [pendingTab])
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [approvingId, setApprovingId] = useState<string | null>(null)
@@ -46,6 +60,7 @@ export default function ContentView({
   // Existing image paths the user wants to retain when editing a request
   const [keepExistingImages, setKeepExistingImages] = useState<string[]>([])
   const [requestNoteError, setRequestNoteError] = useState('')
+  const [uploadDragActive, setUploadDragActive] = useState(false)
   const [submittingRequest, setSubmittingRequest] = useState(false)
 
   // Filter posts per tab
@@ -64,16 +79,6 @@ export default function ContentView({
     if (!path) return null
     const cleanPath = path.startsWith('/') ? path.slice(1) : path
     return `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
-  }
-
-  async function downloadImage(url: string, filename: string) {
-    const res = await fetch(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`)
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(a.href)
   }
 
   async function handleCardApprove(postId: string) {
@@ -132,8 +137,7 @@ export default function ContentView({
     await handleCardApprove(selectedPost.id)
   }
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || [])
+  function addFiles(files: File[]) {
     if (files.length === 0) return
     setRequestFiles(prev => [...prev, ...files])
     files.forEach(f => {
@@ -143,6 +147,10 @@ export default function ContentView({
       }
       reader.readAsDataURL(f)
     })
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    addFiles(Array.from(e.target.files || []))
   }
 
   function removeFile(i: number) {
@@ -260,8 +268,8 @@ export default function ContentView({
               post={post}
               theme={theme}
               onClick={() => openPost(post)}
-              onApprove={handleCardApprove}
-              onRequestChanges={openRequestModal}
+              onApprove={readOnly ? undefined : handleCardApprove}
+              onRequestChanges={readOnly ? undefined : openRequestModal}
               approvingId={approvingId}
             />
           ))}
@@ -295,12 +303,11 @@ export default function ContentView({
 
             {/* Left: image */}
             <div
-              className={`relative flex-shrink-0 w-full sm:w-72 bg-gray-900 ${
-                selectedPost.format === 'Story' ? 'aspect-[9/16]' : 'aspect-square'
-              } sm:aspect-auto sm:min-h-[400px]`}
+              className="relative flex-shrink-0 w-full sm:w-72 bg-black sm:aspect-auto sm:min-h-[400px] overflow-hidden"
+              style={{ aspectRatio: aspectRatioToCSS(getAspectRatioForPost(selectedPost.format || '', (selectedPost.platform || '').split(' + ').filter(Boolean))) }}
             >
               {currentImageUrl ? (
-                <img src={currentImageUrl} alt="Post" className="w-full h-full object-cover" />
+                <img src={currentImageUrl} alt="Post" className="w-full h-full object-contain" />
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center"
@@ -396,51 +403,24 @@ export default function ContentView({
                   <p className={`text-xs font-semibold uppercase tracking-widest mb-1.5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>Your Change Request</p>
                   <p className={`text-sm leading-relaxed mb-2 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>{selectedPost.change_request_note}</p>
                   {selectedPost.change_request_images && selectedPost.change_request_images.length > 0 && (
-                    <div>
-                      <div className="flex gap-3 flex-wrap mb-2">
-                        {selectedPost.change_request_images.map((path, i) => {
-                          const url = getImageUrl(path)
-                          if (!url) return null
-                          return (
-                            <div key={i} className="flex flex-col items-center gap-1">
-                              <button
-                                onClick={() => setLightboxUrl(url)}
-                                className="focus:outline-none"
-                              >
-                                <img
-                                  src={url}
-                                  alt={`Reference ${i + 1}`}
-                                  className="w-24 h-24 object-cover rounded-lg border border-amber-300/50 hover:opacity-80 transition-opacity cursor-pointer"
-                                />
-                              </button>
-                              <button
-                                onClick={() => downloadImage(url, `reference-${i + 1}.jpg`)}
-                                className={`text-[10px] font-medium ${isDark ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-800'}`}
-                              >
-                                Download
-                              </button>
-                            </div>
-                          )
-                        })}
-                      </div>
-                      {selectedPost.change_request_images.length > 1 && (
-                        <button
-                          onClick={async () => {
-                            for (let i = 0; i < selectedPost.change_request_images!.length; i++) {
-                              const url = getImageUrl(selectedPost.change_request_images![i])
-                              if (!url) continue
-                              await downloadImage(url, `reference-${i + 1}.jpg`)
-                            }
-                          }}
-                          className={`text-xs font-semibold border rounded-lg px-3 py-1.5 transition-colors ${
-                            isDark
-                              ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
-                              : 'border-amber-200 text-amber-700 hover:bg-amber-100'
-                          }`}
-                        >
-                          Download all ({selectedPost.change_request_images.length})
-                        </button>
-                      )}
+                    <div className="flex gap-3 flex-wrap">
+                      {selectedPost.change_request_images.map((path, i) => {
+                        const url = getImageUrl(path)
+                        if (!url) return null
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setLightboxUrl(url)}
+                            className="focus:outline-none"
+                          >
+                            <img
+                              src={url}
+                              alt={`Reference ${i + 1}`}
+                              className="w-24 h-24 object-cover rounded-lg border border-amber-300/50 hover:opacity-80 transition-opacity cursor-pointer"
+                            />
+                          </button>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -458,7 +438,18 @@ export default function ContentView({
 
               {/* Actions + inline request form */}
               <div className="mt-auto pt-2 flex flex-col gap-2">
-                {isSelectedAwaiting && !showInlineRequest && (
+                {readOnly && (
+                  <div className={`w-full py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 ${
+                    isDark ? 'bg-white/5 border border-white/10 text-gray-500' : 'bg-gray-100 border border-gray-200 text-gray-400'
+                  }`}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Manager preview — read only
+                  </div>
+                )}
+                {!readOnly && isSelectedAwaiting && !showInlineRequest && (
                   <>
                     <button
                       onClick={handlePanelApprove}
@@ -487,7 +478,7 @@ export default function ContentView({
                   </>
                 )}
 
-                {selectedPost.status === 'Requested Changes' && !showInlineRequest && (
+                {!readOnly && selectedPost.status === 'Requested Changes' && !showInlineRequest && (
                   <>
                     <div className={`w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 ${
                       isDark ? 'bg-amber-500/10 border border-amber-500/20 text-amber-300' : 'bg-amber-50 border border-amber-200 text-amber-700'
@@ -548,13 +539,18 @@ export default function ContentView({
                             if (!url) return null
                             return (
                               <div key={i} className="relative">
-                                <img
-                                  src={url}
-                                  alt={`Existing ${i + 1}`}
-                                  className="w-14 h-14 object-cover rounded-lg border border-amber-200"
-                                />
                                 <button
-                                  onClick={() => setKeepExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                                  onClick={() => setLightboxUrl(url)}
+                                  className="focus:outline-none"
+                                >
+                                  <img
+                                    src={url}
+                                    alt={`Existing ${i + 1}`}
+                                    className="w-14 h-14 object-cover rounded-lg border border-amber-200 hover:opacity-80 transition-opacity cursor-pointer"
+                                  />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setKeepExistingImages(prev => prev.filter((_, idx) => idx !== i)) }}
                                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold hover:bg-red-600"
                                 >
                                   ×
@@ -568,11 +564,18 @@ export default function ContentView({
 
                     {/* New image upload */}
                     <div>
-                      <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-xs font-medium ${
-                        isDark
-                          ? 'border-white/10 hover:border-white/20 text-gray-500'
-                          : 'border-amber-200 hover:border-amber-300 text-amber-600'
-                      }`}>
+                      <label
+                        onDragOver={e => { e.preventDefault(); setUploadDragActive(true) }}
+                        onDragEnter={e => { e.preventDefault(); setUploadDragActive(true) }}
+                        onDragLeave={e => { e.preventDefault(); setUploadDragActive(false) }}
+                        onDrop={e => { e.preventDefault(); setUploadDragActive(false); addFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-xs font-medium ${
+                          uploadDragActive
+                            ? 'border-amber-400 bg-amber-50 text-amber-600'
+                            : isDark
+                            ? 'border-white/10 hover:border-white/20 text-gray-500'
+                            : 'border-amber-200 hover:border-amber-300 text-amber-600'
+                        }`}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                         </svg>

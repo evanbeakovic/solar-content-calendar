@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import ManagerNavbar from './components/ManagerNavbar'
+import ManagerShell from './components/ManagerShell'
 
 export default async function ManagerLayout({
   children,
@@ -22,11 +22,8 @@ export default async function ManagerLayout({
   if (!profile || profile.role !== 'manager') redirect('/login')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ManagerNavbar profile={profile} />
-      <main className="pt-16">
-        {children}
-      </main>
-    </div>
+    <ManagerShell profile={profile}>
+      {children}
+    </ManagerShell>
   )
 }

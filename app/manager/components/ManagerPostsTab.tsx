@@ -11,6 +11,7 @@ import PostCard from '@/app/smm/components/PostCard'
 import NewPostModal from '@/app/smm/components/NewPostModal'
 import EditPostModal from '@/app/smm/components/EditPostModal'
 import CSVImportModal from '@/app/smm/components/CSVImportModal'
+import ContentView from '@/app/client/components/ContentView'
 
 interface ManagerPostsTabProps {
   initialPosts: Post[]
@@ -718,25 +719,16 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
             )}
           </div>
 
-          {/* Placeholder */}
-          <div className="rounded-2xl bg-gray-900 border border-gray-800 px-8 py-16 flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-            </div>
-            <p className="text-gray-400 font-medium text-sm">
-              Client preview will be displayed here once the client portal UI is finalised.
-            </p>
-            <p className="text-gray-600 text-xs mt-2">
-              {previewSelectedClients.length === clients.length
-                ? `Showing all ${clients.length} client${clients.length !== 1 ? 's' : ''}`
-                : `Showing ${previewSelectedClients.length} of ${clients.length} client${clients.length !== 1 ? 's' : ''}`}
-              {' · '}
-              {posts.filter(p => previewSelectedClients.includes(p.client_id)).length} posts
-            </p>
+          {/* Read-only ContentView preview */}
+          <div className="rounded-2xl bg-[#0a0f1a] overflow-hidden">
+            <ContentView
+              posts={posts}
+              clients={clients}
+              activeClientIds={previewSelectedClients}
+              theme="dark"
+              onPostUpdated={() => {}}
+              readOnly
+            />
           </div>
         </div>
       )}

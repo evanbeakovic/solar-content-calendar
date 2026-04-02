@@ -50,6 +50,7 @@ export interface Post {
   change_request_note?: string | null
   change_request_images?: string[] | null
   change_request_fixed?: boolean | null
+  youtube_thumbnail_path?: string | null
   client?: Client
   comments?: Comment[]
   images?: PostImage[]

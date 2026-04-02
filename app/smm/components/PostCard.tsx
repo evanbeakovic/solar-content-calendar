@@ -32,6 +32,8 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
   const [deleting, setDeleting] = useState(false)
   const [showRequestNoteModal, setShowRequestNoteModal] = useState(false)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedImageIndices, setSelectedImageIndices] = useState<Set<number>>(new Set())
 
   const brandPrimary = post.client?.brand_primary || '#10375C'
   const brandSecondary = post.client?.brand_secondary || '#8EE3E3'
@@ -104,6 +106,22 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
     setDeleting(false)
   }
 
+  async function downloadImage(url: string, filename: string) {
+    const res = await fetch(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`)
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  function closeRequestNoteModal() {
+    setShowRequestNoteModal(false)
+    setSelectionMode(false)
+    setSelectedImageIndices(new Set())
+  }
+
   const isFixed = post.change_request_fixed === true
   const hasChangeRequest = !!post.change_request_note
   const hasChangeImages = !!(post.change_request_images && post.change_request_images.length > 0)
@@ -120,11 +138,11 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
       {/* Image / color header */}
       <div className="relative flex-shrink-0">
         {imageUrl ? (
-          <div className="relative h-32 w-full overflow-hidden bg-gray-100">
+          <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
             <Image src={imageUrl} alt={post.headline || 'Post image'} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
         ) : (
-          <div className="h-16 w-full" style={{ backgroundColor: brandSecondary || '#8EE3E3' }} />
+          <div className="aspect-square w-full" style={{ backgroundColor: brandSecondary || '#8EE3E3' }} />
         )}
 
         {/* Checkbox */}
@@ -383,14 +401,24 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
           onClick={e => { e.stopPropagation(); setLightboxUrl(null) }}
         >
-          <button
-            onClick={e => { e.stopPropagation(); setLightboxUrl(null) }}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={async e => { e.stopPropagation(); await downloadImage(lightboxUrl, 'image.jpg') }}
+              className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); setLightboxUrl(null) }}
+              className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
           <img
             src={lightboxUrl}
             alt="Full size"
@@ -404,14 +432,14 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
       {showRequestNoteModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={e => { e.stopPropagation(); setShowRequestNoteModal(false) }}
+          onClick={e => { e.stopPropagation(); closeRequestNoteModal() }}
         >
           <div
             className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6"
             onClick={e => e.stopPropagation()}
           >
             <button
-              onClick={e => { e.stopPropagation(); setShowRequestNoteModal(false) }}
+              onClick={e => { e.stopPropagation(); closeRequestNoteModal() }}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/10 text-gray-700 hover:bg-black/15 flex items-center justify-center transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -425,63 +453,108 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
             {hasChangeImages && (
               <div>
                 {void console.log('[SMM PostCard modal] change_request_images:', post.change_request_images)}
-                <div className="flex gap-3 flex-wrap mb-3">
+                <div className="flex gap-3 flex-wrap mb-2">
                   {post.change_request_images!.map((path, i) => {
                     const cleanPath = path.startsWith('/') ? path.slice(1) : path
                     const url = `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
+                    const isChecked = selectedImageIndices.has(i)
                     return (
-                      <div key={i} className="flex flex-col items-center gap-1">
+                      <div key={i} className="relative">
                         <button
-                          onClick={e => { e.stopPropagation(); setLightboxUrl(url) }}
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (selectionMode) {
+                              setSelectedImageIndices(prev => {
+                                const next = new Set(prev)
+                                next.has(i) ? next.delete(i) : next.add(i)
+                                return next
+                              })
+                            } else {
+                              setLightboxUrl(url)
+                            }
+                          }}
                           className="focus:outline-none"
                         >
                           <img
                             src={url}
                             alt={`Reference ${i + 1}`}
-                            className="w-24 h-24 object-cover rounded-lg border border-amber-200 hover:opacity-80 transition-opacity cursor-pointer"
+                            className={`w-24 h-24 object-cover rounded-lg border transition-opacity cursor-pointer ${
+                              selectionMode && isChecked
+                                ? 'border-amber-500 ring-2 ring-amber-400'
+                                : 'border-amber-200 hover:opacity-80'
+                            }`}
                           />
                         </button>
-                        <button
-                          onClick={async e => {
-                            e.stopPropagation()
-                            const filename = `reference-${i + 1}.jpg`
-                            const res = await fetch(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`)
-                            const blob = await res.blob()
-                            const a = document.createElement('a')
-                            a.href = URL.createObjectURL(blob)
-                            a.download = filename
-                            a.click()
-                            URL.revokeObjectURL(a.href)
-                          }}
-                          className="text-[10px] text-amber-600 hover:text-amber-800 font-medium"
-                        >
-                          Download
-                        </button>
+                        {selectionMode && (
+                          <div
+                            className={`absolute top-1 left-1 w-5 h-5 rounded flex items-center justify-center border-2 pointer-events-none ${
+                              isChecked ? 'bg-amber-500 border-amber-500' : 'bg-white/80 border-gray-400'
+                            }`}
+                          >
+                            {isChecked && (
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
                 </div>
-                {post.change_request_images!.length > 1 && (
-                  <button
-                    onClick={async e => {
-                      e.stopPropagation()
-                      for (let i = 0; i < post.change_request_images!.length; i++) {
-                        const cleanPath = post.change_request_images![i].startsWith('/') ? post.change_request_images![i].slice(1) : post.change_request_images![i]
-                        const url = `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
-                        const filename = `reference-${i + 1}.jpg`
-                        const res = await fetch(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`)
-                        const blob = await res.blob()
-                        const a = document.createElement('a')
-                        a.href = URL.createObjectURL(blob)
-                        a.download = filename
-                        a.click()
-                        URL.revokeObjectURL(a.href)
-                      }
-                    }}
-                    className="text-xs text-amber-700 hover:text-amber-900 font-semibold border border-amber-200 rounded-lg px-3 py-1.5 hover:bg-amber-50 transition-colors"
-                  >
-                    Download all ({post.change_request_images!.length})
-                  </button>
+                {selectionMode ? (
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={e => {
+                        e.stopPropagation()
+                        setSelectedImageIndices(new Set(post.change_request_images!.map((_, i) => i)))
+                      }}
+                      className="text-xs font-medium text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 hover:bg-amber-50 transition-colors"
+                    >
+                      Select all
+                    </button>
+                    <button
+                      disabled={selectedImageIndices.size === 0}
+                      onClick={async e => {
+                        e.stopPropagation()
+                        const indices = Array.from(selectedImageIndices).sort((a, b) => a - b)
+                        for (const i of indices) {
+                          const cleanPath = post.change_request_images![i].startsWith('/') ? post.change_request_images![i].slice(1) : post.change_request_images![i]
+                          const url = `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
+                          await downloadImage(url, `reference-${i + 1}.jpg`)
+                        }
+                      }}
+                      className="text-xs font-semibold border border-amber-300 text-amber-700 rounded-lg px-3 py-1.5 hover:bg-amber-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Download ({selectedImageIndices.size})
+                    </button>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation()
+                        setSelectionMode(false)
+                        setSelectedImageIndices(new Set())
+                      }}
+                      className="text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-end">
+                    <button
+                      onClick={e => {
+                        e.stopPropagation()
+                        setSelectionMode(true)
+                        setSelectedImageIndices(new Set())
+                      }}
+                      className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition-colors"
+                      title="Download images"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                      </svg>
+                    </button>
+                  </div>
                 )}
               </div>
             )}

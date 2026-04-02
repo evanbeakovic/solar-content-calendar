@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Post, Client, PostStatus } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { format, startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns'
@@ -144,6 +144,12 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
   const [selectedPostIds, setSelectedPostIds] = useState<Set<string>>(new Set())
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false)
+
+  useEffect(() => {
+    function handleNewPost() { setShowNewPost(true) }
+    window.addEventListener('smm:new-post', handleNewPost)
+    return () => window.removeEventListener('smm:new-post', handleNewPost)
+  }, [])
 
   const periodRange = getPeriodRange(period, customFrom, customTo)
 

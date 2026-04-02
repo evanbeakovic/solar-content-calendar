@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Post, Client, Profile } from '@/lib/types'
-import ClientNavbar from './ClientNavbar'
 import ClientSidebar from './ClientSidebar'
 import ContentView from './ContentView'
 import CalendarView from './CalendarView'
@@ -18,14 +17,18 @@ interface ClientPortalProps {
 export default function ClientPortal({ initialPosts, clients, profile }: ClientPortalProps) {
   const [view, setView] = useState<'content' | 'calendar'>('content')
   const [calendarKey, setCalendarKey] = useState(0)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pendingContentTab, setPendingContentTab] = useState<string | null>(null)
+  const [isWide, setIsWide] = useState(true)
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark')
   const [systemIsDark, setSystemIsDark] = useState(true)
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [activeClientIds, setActiveClientIds] = useState<string[]>(clients.map(c => c.id))
 
-  // Initialise theme from localStorage (client side only)
+  // Read persisted preferences on mount
   useEffect(() => {
+    const savedWidth = localStorage.getItem('solar-client-sidebar-width')
+    if (savedWidth === 'slim') setIsWide(false)
+
     const saved = localStorage.getItem('solar-theme') as ThemeMode | null
     if (saved === 'dark' || saved === 'light' || saved === 'system') {
       setThemeMode(saved)
@@ -43,15 +46,28 @@ export default function ClientPortal({ initialPosts, clients, profile }: ClientP
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // Resolve effective theme
+  // Resolve effective theme and apply to document.documentElement for dark: CSS classes
   const resolvedTheme: 'dark' | 'light' =
     themeMode === 'system' ? (systemIsDark ? 'dark' : 'light') : themeMode
+
+  useEffect(() => {
+    if (resolvedTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [resolvedTheme])
+
+  function toggleWidth() {
+    const next = !isWide
+    setIsWide(next)
+    localStorage.setItem('solar-client-sidebar-width', next ? 'wide' : 'slim')
+  }
 
   function handlePostUpdated(updatedPost: Post) {
     setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p))
   }
 
-  // Increment calendarKey when leaving calendar → content, causing CalendarView to remount fresh
   function handleViewChange(newView: 'content' | 'calendar') {
     if (view === 'calendar' && newView === 'content') {
       setCalendarKey(k => k + 1)
@@ -59,29 +75,33 @@ export default function ClientPortal({ initialPosts, clients, profile }: ClientP
     setView(newView)
   }
 
+  function handleNavigateToContent(tab: string) {
+    setPendingContentTab(tab)
+    handleViewChange('content')
+  }
+
+  const sidebarWidth = isWide ? 240 : 56
+
   return (
     <div className={`min-h-screen ${resolvedTheme === 'dark' ? 'bg-[#0a0f1a]' : 'bg-gray-50'}`}>
-      <ClientNavbar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        view={view}
-        setView={handleViewChange}
+      <ClientSidebar
+        profile={profile}
         clients={clients}
         activeClientIds={activeClientIds}
         setActiveClientIds={setActiveClientIds}
-        theme={resolvedTheme}
-      />
-
-      <ClientSidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        theme={resolvedTheme}
+        view={view}
+        setView={handleViewChange}
+        isWide={isWide}
+        onToggleWidth={toggleWidth}
         themeMode={themeMode}
         setThemeMode={setThemeMode}
-        profile={profile}
+        theme={resolvedTheme}
       />
 
-      <main className="pt-14">
+      <main
+        className="transition-[margin-left] duration-200"
+        style={{ marginLeft: sidebarWidth }}
+      >
         {view === 'content' ? (
           <ContentView
             posts={posts}
@@ -89,6 +109,8 @@ export default function ClientPortal({ initialPosts, clients, profile }: ClientP
             activeClientIds={activeClientIds}
             theme={resolvedTheme}
             onPostUpdated={handlePostUpdated}
+            pendingTab={pendingContentTab ?? undefined}
+            onTabConsumed={() => setPendingContentTab(null)}
           />
         ) : (
           <CalendarView
@@ -96,6 +118,7 @@ export default function ClientPortal({ initialPosts, clients, profile }: ClientP
             posts={posts.filter(p => activeClientIds.includes(p.client_id))}
             theme={resolvedTheme}
             onPostUpdated={handlePostUpdated}
+            onNavigateToContent={handleNavigateToContent}
           />
         )}
       </main>

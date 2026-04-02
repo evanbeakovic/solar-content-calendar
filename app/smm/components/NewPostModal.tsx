@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Client, Post } from '@/lib/types'
+import { POST_FORMATS } from '@/lib/postFormats'
 
 interface NewPostModalProps {
   clients: Client[]
@@ -9,8 +10,8 @@ interface NewPostModalProps {
   onCreated: (post: Post) => void
 }
 
-const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'Twitter', 'TikTok']
-const FORMATS = ['Post', 'Carousel', 'Story', 'Reel', 'Video']
+const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'Twitter', 'TikTok', 'YouTube']
+const FORMATS = ['Post', 'Carousel', 'Story', 'Reel', 'Video', 'Thumbnail', 'Short']
 
 function getPlatformLabel(platforms: string[], format: string): string {
   if (platforms.length === 0) return ''
@@ -51,6 +52,18 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
     setSelectedPlatforms(prev =>
       prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
     )
+  }
+
+  // Bug G: filter formats to only those compatible with selected platforms
+  function getAvailableFormats(): string[] {
+    if (selectedPlatforms.length === 0) return FORMATS
+    const available = new Set<string>()
+    for (const rule of POST_FORMATS) {
+      if (rule.platforms.some(p => selectedPlatforms.includes(p))) {
+        available.add(rule.format)
+      }
+    }
+    return FORMATS.filter(f => available.has(f))
   }
 
   const isVideo = form.format === 'Reel' || form.format === 'Video'
@@ -167,7 +180,7 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white"
               >
                 <option value="">Select format...</option>
-                {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
+                {getAvailableFormats().map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
           </div>

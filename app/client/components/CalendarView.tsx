@@ -9,11 +9,13 @@ import {
 
 import { Post } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
+import { getAspectRatioForPost, aspectRatioToCSS } from '@/lib/postFormats'
 
 interface CalendarViewProps {
   posts: Post[]
   theme: 'dark' | 'light'
   onPostUpdated: (post: Post) => void
+  onNavigateToContent?: (tab: string) => void
 }
 
 type ViewMode = 'month' | 'week'
@@ -49,7 +51,7 @@ function getPostsForDay(posts: Post[], day: Date) {
   })
 }
 
-export default function CalendarView({ posts, theme, onPostUpdated }: CalendarViewProps) {
+export default function CalendarView({ posts, theme, onPostUpdated, onNavigateToContent }: CalendarViewProps) {
   const supabase = createClient()
   const isDark = theme === 'dark'
 
@@ -71,6 +73,7 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
   const [requestFilePreviews, setRequestFilePreviews] = useState<string[]>([])
   const [requestNoteError, setRequestNoteError] = useState('')
   const [submittingRequest, setSubmittingRequest] = useState(false)
+  const [uploadDragActive, setUploadDragActive] = useState(false)
 
   // ── Navigation ────────────────────────────────────────────────
 
@@ -169,16 +172,6 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
     return `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
   }
 
-  async function downloadImage(url: string, filename: string) {
-    const res = await fetch(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`)
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(a.href)
-  }
-
   function openPost(post: Post) {
     setSelectedPost(post)
     setCarouselIndex(0)
@@ -266,8 +259,7 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
     setRequestNoteError('')
   }
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || [])
+  function addFiles(files: File[]) {
     if (files.length === 0) return
     setRequestFiles(prev => [...prev, ...files])
     files.forEach(f => {
@@ -277,6 +269,10 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
       }
       reader.readAsDataURL(f)
     })
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    addFiles(Array.from(e.target.files || []))
   }
 
   function removeFile(i: number) {
@@ -333,27 +329,36 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
         </div>
 
         {/* Awaiting review */}
-        <div className={`rounded-2xl p-5 ${cardBg} ${cardBorder}`}>
+        <button
+          onClick={() => onNavigateToContent?.('awaiting')}
+          className={`rounded-2xl p-5 text-left transition-opacity hover:opacity-80 ${cardBg} ${cardBorder}`}
+        >
           <p className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textMuted}`}>Awaiting review</p>
           <p className="text-3xl font-bold text-amber-400">{awaitingCount}</p>
           <p className={`text-xs mt-1 ${textMuted}`}>need your approval</p>
-        </div>
+        </button>
 
         {/* Approved this month */}
-        <div className={`rounded-2xl p-5 ${cardBg} ${cardBorder}`}>
+        <button
+          onClick={() => onNavigateToContent?.('approved')}
+          className={`rounded-2xl p-5 text-left transition-opacity hover:opacity-80 ${cardBg} ${cardBorder}`}
+        >
           <p className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textMuted}`}>Approved this month</p>
           <p className="text-3xl font-bold text-green-400">{approvedThisMonth}</p>
           <p className={`text-xs mt-1 ${textMuted}`}>{approvalRate}% approval rate</p>
-        </div>
+        </button>
 
         {/* Published all time */}
-        <div className={`rounded-2xl p-5 ${cardBg} ${cardBorder}`}>
+        <button
+          onClick={() => onNavigateToContent?.('published')}
+          className={`rounded-2xl p-5 text-left transition-opacity hover:opacity-80 ${cardBg} ${cardBorder}`}
+        >
           <p className={`text-xs font-semibold uppercase tracking-widest mb-2 ${textMuted}`}>Published all time</p>
           <p className={`text-3xl font-bold ${textPrimary}`}>{publishedAllTime}</p>
           <p className={`text-xs mt-1 ${textMuted}`}>
             {pubDiff > 0 ? `+${pubDiff}` : pubDiff < 0 ? `${pubDiff}` : '±0'} vs last month
           </p>
-        </div>
+        </button>
       </div>
 
       {/* ── Toolbar ───────────────────────────────────────────── */}
@@ -599,8 +604,14 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
                 Attach images (optional)
               </label>
               <label
+                onDragOver={e => { e.preventDefault(); setUploadDragActive(true) }}
+                onDragEnter={e => { e.preventDefault(); setUploadDragActive(true) }}
+                onDragLeave={e => { e.preventDefault(); setUploadDragActive(false) }}
+                onDrop={e => { e.preventDefault(); setUploadDragActive(false); addFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) }}
                 className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
-                  isDark
+                  uploadDragActive
+                    ? 'border-[#8EE3E3] bg-[#8EE3E3]/10 text-[#8EE3E3]'
+                    : isDark
                     ? 'border-white/10 hover:border-white/20 text-gray-500 hover:text-gray-400'
                     : 'border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-500'
                 }`}
@@ -608,7 +619,7 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                 </svg>
-                <span className="text-xs font-medium">Click to upload images</span>
+                <span className="text-xs font-medium">Click or drag to upload images</span>
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
               </label>
               {requestFilePreviews.length > 0 && (
@@ -679,12 +690,11 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
 
             {/* Left: image */}
             <div
-              className={`relative flex-shrink-0 w-full sm:w-72 bg-gray-900 ${
-                selectedPost.format === 'Story' ? 'aspect-[9/16]' : 'aspect-square'
-              } sm:aspect-auto sm:min-h-[400px]`}
+              className="relative flex-shrink-0 w-full sm:w-72 bg-black sm:aspect-auto sm:min-h-[400px] overflow-hidden"
+              style={{ aspectRatio: aspectRatioToCSS(getAspectRatioForPost(selectedPost.format || '', (selectedPost.platform || '').split(' + ').filter(Boolean))) }}
             >
               {currentImageUrl ? (
-                <img src={currentImageUrl} alt="Post" className="w-full h-full object-cover" />
+                <img src={currentImageUrl} alt="Post" className="w-full h-full object-contain" />
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center"
@@ -776,49 +786,23 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
                   <p className={`text-xs font-semibold uppercase tracking-widest mb-1.5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>Your Change Request</p>
                   <p className={`text-sm leading-relaxed mb-2 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>{selectedPost.change_request_note}</p>
                   {selectedPost.change_request_images && selectedPost.change_request_images.length > 0 && (
-                    <div>
-                      <div className="flex gap-3 flex-wrap mb-2">
-                        {selectedPost.change_request_images.map((path, i) => {
-                          const url = getChangeRequestImageUrl(path)
-                          return (
-                            <div key={i} className="flex flex-col items-center gap-1">
-                              <button
-                                onClick={() => setLightboxUrl(url)}
-                                className="focus:outline-none"
-                              >
-                                <img
-                                  src={url}
-                                  alt={`Reference ${i + 1}`}
-                                  className="w-24 h-24 object-cover rounded-lg border border-amber-300/50 hover:opacity-80 transition-opacity cursor-pointer"
-                                />
-                              </button>
-                              <button
-                                onClick={() => downloadImage(url, `reference-${i + 1}.jpg`)}
-                                className={`text-[10px] font-medium ${isDark ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-800'}`}
-                              >
-                                Download
-                              </button>
-                            </div>
-                          )
-                        })}
-                      </div>
-                      {selectedPost.change_request_images.length > 1 && (
-                        <button
-                          onClick={async () => {
-                            for (let i = 0; i < selectedPost.change_request_images!.length; i++) {
-                              const url = getChangeRequestImageUrl(selectedPost.change_request_images![i])
-                              await downloadImage(url, `reference-${i + 1}.jpg`)
-                            }
-                          }}
-                          className={`text-xs font-semibold border rounded-lg px-3 py-1.5 transition-colors ${
-                            isDark
-                              ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
-                              : 'border-amber-200 text-amber-700 hover:bg-amber-100'
-                          }`}
-                        >
-                          Download all ({selectedPost.change_request_images.length})
-                        </button>
-                      )}
+                    <div className="flex gap-3 flex-wrap">
+                      {selectedPost.change_request_images.map((path, i) => {
+                        const url = getChangeRequestImageUrl(path)
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setLightboxUrl(url)}
+                            className="focus:outline-none"
+                          >
+                            <img
+                              src={url}
+                              alt={`Reference ${i + 1}`}
+                              className="w-24 h-24 object-cover rounded-lg border border-amber-300/50 hover:opacity-80 transition-opacity cursor-pointer"
+                            />
+                          </button>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -873,11 +857,18 @@ export default function CalendarView({ posts, theme, onPostUpdated }: CalendarVi
                       {requestNoteError && <p className="text-xs text-red-400 mt-1">{requestNoteError}</p>}
                     </div>
                     <div>
-                      <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-xs font-medium ${
-                        isDark
-                          ? 'border-white/10 hover:border-white/20 text-gray-500'
-                          : 'border-amber-200 hover:border-amber-300 text-amber-600'
-                      }`}>
+                      <label
+                        onDragOver={e => { e.preventDefault(); setUploadDragActive(true) }}
+                        onDragEnter={e => { e.preventDefault(); setUploadDragActive(true) }}
+                        onDragLeave={e => { e.preventDefault(); setUploadDragActive(false) }}
+                        onDrop={e => { e.preventDefault(); setUploadDragActive(false); addFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))) }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-xs font-medium ${
+                          uploadDragActive
+                            ? 'border-[#8EE3E3] bg-[#8EE3E3]/10 text-[#8EE3E3]'
+                            : isDark
+                            ? 'border-white/10 hover:border-white/20 text-gray-500'
+                            : 'border-amber-200 hover:border-amber-300 text-amber-600'
+                        }`}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                         </svg>
