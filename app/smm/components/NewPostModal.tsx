@@ -117,7 +117,7 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
 
         {/* Error banner — always visible, outside scrollable area */}
         {error && (
-          <div className="mx-6 mt-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium flex items-start gap-2 flex-shrink-0">
+          <div className="mx-6 mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-medium flex items-start gap-2 flex-shrink-0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 mt-0.5">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
@@ -187,7 +187,7 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
 
           {/* Format hint */}
           {form.format && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-blue-700 font-medium">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl px-4 py-2.5 text-xs text-blue-700 dark:text-blue-300 font-medium">
               {isVideo && '🎬 Video format selected — only video files can be uploaded for this post'}
               {isCarousel && '🖼 Carousel selected — you can upload multiple images after creating the post'}
               {!isVideo && !isCarousel && '🖼 Single file upload available after creating the post'}
@@ -275,13 +275,13 @@ export default function NewPostModal({ clients, onClose, onCreated }: NewPostMod
                   type="color"
                   value={form.background_color}
                   onChange={(e) => handleChange('background_color', e.target.value)}
-                  className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                  className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer"
                 />
                 <input
                   type="text"
                   value={form.background_color}
                   onChange={(e) => handleChange('background_color', e.target.value)}
-                  className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 font-mono text-sm"
+                  className="flex-1 px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 font-mono text-sm"
                   placeholder="#ffffff"
                 />
               </div>

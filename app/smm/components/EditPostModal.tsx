@@ -360,7 +360,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
             <div className="relative">
               <button
                 onClick={() => { setShowHeaderMenu(v => !v); setShowDeleteConfirm(false) }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="12" cy="5" r="1.5"/>
@@ -387,7 +387,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                       {!showDeleteConfirm ? (
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <polyline points="3 6 5 6 21 6"/>
@@ -423,7 +423,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
             </div>
 
             {/* Close button */}
-            <button onClick={requestClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+            <button onClick={requestClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -624,12 +624,12 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               />
 
               {resolutionWarning && (
-                <div className="mt-2 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                <div className="mt-2 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" className="flex-shrink-0 mt-0.5">
                     <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                     <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
-                  <p className="text-xs text-amber-700">{resolutionWarning}</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">{resolutionWarning}</p>
                 </div>
               )}
             </div>
@@ -650,7 +650,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     if (file) await processYoutubeThumbnailFile(file)
                   }}
                   className={`rounded-xl border-2 border-dashed transition-colors overflow-hidden ${
-                    ytDragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200'
+                    ytDragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200 dark:border-gray-600'
                   }`}
                 >
                   {youtubeThumbnailPath ? (
@@ -809,7 +809,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Background Color</label>
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 relative overflow-hidden"
+                    className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer flex-shrink-0 relative overflow-hidden"
                     style={{ backgroundColor: form.background_color }}
                   >
                     <input
@@ -842,7 +842,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
         {/* Sticky footer — always visible Save button */}
         <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 px-6 py-4 rounded-b-2xl bg-white dark:bg-gray-900">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-3">{error}</div>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm mb-3">{error}</div>
           )}
           <button
             type="submit"
