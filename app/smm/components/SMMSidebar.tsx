@@ -355,7 +355,7 @@ export default function SMMSidebar({
         <button
           onClick={handleLogout}
           title={!isWide ? 'Sign out' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >

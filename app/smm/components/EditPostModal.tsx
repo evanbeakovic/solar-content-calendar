@@ -490,7 +490,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     return (
                       <div
                         key={img.id}
-                        className={`relative rounded-xl overflow-hidden bg-gray-100 group ${
+                        className={`relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 group ${
                           isStory ? 'aspect-[9/16]' : 'aspect-square'
                         }`}
                       >
@@ -526,7 +526,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     }}
                     className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center gap-1 ${
                       isStory ? 'aspect-[9/16]' : 'aspect-square'
-                    } ${dragActive ? 'border-[#10375C] bg-[#10375C]/5 text-[#10375C]' : 'border-gray-200 text-gray-400 hover:border-[#10375C] hover:text-[#10375C]'}`}
+                    } ${dragActive ? 'border-[#10375C] bg-[#10375C]/5 text-[#10375C]' : 'border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-[#10375C] hover:text-[#10375C]'}`}
                   >
                     {uploadingImage ? (
                       <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -556,7 +556,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     if (files.length > 0) await processImageFiles([files[0]])
                   }}
                   className={`rounded-xl border-2 border-dashed transition-colors overflow-hidden ${
-                    dragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200'
+                    dragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200 dark:border-gray-600'
                   }`}
                 >
                   {imageUrl ? (
@@ -823,7 +823,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     type="text"
                     value={form.background_color}
                     onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 font-mono text-sm"
+                    className="flex-1 px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 font-mono text-sm"
                     placeholder="#ffffff"
                   />
                 </div>

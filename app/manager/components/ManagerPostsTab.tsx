@@ -475,7 +475,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
           </div>
 
           {/* Filters bar */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5 flex flex-wrap items-center gap-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 mb-5 flex flex-wrap items-center gap-4">
             <ClientFilterDropdown
               clients={clients}
               selected={selectedClients}
@@ -543,14 +543,12 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                     isActive
                       ? `${styles.active} border-transparent shadow-sm`
-                      : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : styles.dot}`} />
+                  <div className={`w-2 h-2 rounded-full ${styles.dot}`} />
                   {status}
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300`}>
                     {count}
                   </span>
                 </button>

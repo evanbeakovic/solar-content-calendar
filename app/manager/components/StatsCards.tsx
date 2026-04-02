@@ -16,12 +16,12 @@ interface StatsCardsProps {
   flaggedClientList: ClientWithStats[]
 }
 
-const STATUS_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
-  'To Be Confirmed': { bg: 'bg-gray-100', text: 'text-gray-700', icon: '⏳' },
-  'Being Created': { bg: 'bg-blue-50', text: 'text-blue-700', icon: '✏️' },
-  'Confirmed': { bg: 'bg-green-50', text: 'text-green-700', icon: '✓' },
-  'Scheduled': { bg: 'bg-yellow-50', text: 'text-yellow-700', icon: '📅' },
-  'Posted': { bg: 'bg-purple-50', text: 'text-purple-700', icon: '🚀' },
+const STATUS_COLORS: Record<string, { bg: string; text: string; darkText: string; icon: string }> = {
+  'To Be Confirmed': { bg: 'bg-gray-100 dark:bg-[#1e2433]', text: 'text-gray-700', darkText: 'dark:text-gray-300', icon: '⏳' },
+  'Being Created': { bg: 'bg-blue-50 dark:bg-[#1e2433]', text: 'text-blue-700', darkText: 'dark:text-blue-400', icon: '✏️' },
+  'Confirmed': { bg: 'bg-green-50 dark:bg-[#1e2433]', text: 'text-green-700', darkText: 'dark:text-green-400', icon: '✓' },
+  'Scheduled': { bg: 'bg-yellow-50 dark:bg-[#1e2433]', text: 'text-yellow-700', darkText: 'dark:text-yellow-400', icon: '📅' },
+  'Posted': { bg: 'bg-purple-50 dark:bg-[#1e2433]', text: 'text-purple-700', darkText: 'dark:text-purple-400', icon: '🚀' },
 }
 
 export default function StatsCards({
@@ -146,10 +146,10 @@ export default function StatsCards({
         <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Posts by Status</h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {Object.entries(STATUS_COLORS).map(([status, styles]) => (
-            <div key={status} className={`${styles.bg} rounded-xl p-4 text-center`}>
+            <div key={status} className={`${styles.bg} rounded-xl p-4 text-center border border-transparent dark:border-gray-700`}>
               <div className="text-2xl mb-1">{styles.icon}</div>
-              <div className={`text-2xl font-bold ${styles.text}`}>{postsByStatus[status] || 0}</div>
-              <div className={`text-xs ${styles.text} opacity-70 mt-0.5 font-medium`}>{status}</div>
+              <div className={`text-2xl font-bold ${styles.text} ${styles.darkText}`}>{postsByStatus[status] || 0}</div>
+              <div className={`text-xs ${styles.text} ${styles.darkText} opacity-70 mt-0.5 font-medium`}>{status}</div>
             </div>
           ))}
         </div>

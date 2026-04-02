@@ -563,10 +563,10 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all capitalize border ${
               activeTab === tab
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border-gray-300 dark:border-gray-500'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-gray-200 dark:border-gray-600'
             }`}
           >
             {tab}
@@ -598,7 +598,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                     <tr key={profile.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#10375C] bg-opacity-10 flex items-center justify-center text-[#10375C] font-bold text-sm flex-shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gray-500 dark:bg-gray-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                             {profile.full_name ? profile.full_name[0].toUpperCase() : profile.email[0].toUpperCase()}
                           </div>
                           <div>
