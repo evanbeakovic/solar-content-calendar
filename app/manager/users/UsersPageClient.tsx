@@ -588,7 +588,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                   <th className="px-6 py-3"/>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                 {profiles.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500">No users found</td>
@@ -617,7 +617,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                           <div className="flex flex-wrap gap-1.5">
                             {profile.clients.map(c => (
                               <div key={c.id} className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg px-2 py-1">
-                                <div className="w-4 h-4 rounded bg-[#10375C] bg-opacity-20 flex items-center justify-center text-[#10375C] text-xs font-bold">
+                                <div className="w-4 h-4 rounded bg-[#10375C] bg-opacity-20 dark:bg-[#10375C]/40 flex items-center justify-center text-[#10375C] dark:text-[#8EE3E3] text-xs font-bold">
                                   {c.name[0]}
                                 </div>
                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{c.name}</span>
@@ -669,7 +669,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                   <th className="px-6 py-3"/>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                 {clients.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500">No clients yet</td>
@@ -681,7 +681,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                       <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#10375C] bg-opacity-10 flex items-center justify-center text-[#10375C] font-bold text-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#10375C] bg-opacity-10 dark:bg-[#10375C]/40 flex items-center justify-center text-[#10375C] dark:text-[#8EE3E3] font-bold text-sm flex-shrink-0">
                               {logoUrl ? (
                                 <img src={logoUrl} alt={client.name} className="w-full h-full object-cover" />
                               ) : (
