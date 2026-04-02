@@ -17,13 +17,13 @@ interface ClientTableProps {
 const STATUS_ORDER = ['Uploads', 'Being Created', 'To Be Confirmed', 'Requested Changes', 'Confirmed', 'Scheduled', 'Posted']
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
-  'Uploads':           'bg-slate-100 text-slate-600',
-  'Being Created':     'bg-blue-100 text-blue-700',
-  'To Be Confirmed':   'bg-gray-100 text-gray-600',
-  'Requested Changes': 'bg-amber-100 text-amber-700',
-  'Confirmed':         'bg-green-100 text-green-700',
-  'Scheduled':         'bg-yellow-100 text-yellow-700',
-  'Posted':            'bg-purple-100 text-purple-700',
+  'Uploads':           'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+  'Being Created':     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  'To Be Confirmed':   'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+  'Requested Changes': 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  'Confirmed':         'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  'Scheduled':         'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+  'Posted':            'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
 }
 
 function FlagBadge({ client }: { client: ClientWithStats }) {
@@ -54,20 +54,20 @@ function FlagBadge({ client }: { client: ClientWithStats }) {
       {show && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setShow(false)} />
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 z-20 p-4">
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-20 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-semibold text-gray-900">⚠️ {client.name}</span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">⚠️ {client.name}</span>
             </div>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
               This client has <strong>no Confirmed posts</strong> scheduled in the next 7 days. Review their content pipeline and ensure posts are approved and scheduled.
             </p>
-            <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-2">
               <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">{client.totalPosts}</div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{client.totalPosts}</div>
                 <div className="text-xs text-gray-400">Total posts</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-green-600">{client.postCounts['Confirmed'] || 0}</div>
+                <div className="text-lg font-bold text-green-600 dark:text-green-400">{client.postCounts['Confirmed'] || 0}</div>
                 <div className="text-xs text-gray-400">Confirmed</div>
               </div>
             </div>
@@ -81,7 +81,7 @@ function FlagBadge({ client }: { client: ClientWithStats }) {
 export default function ClientTable({ clients }: ClientTableProps) {
   if (clients.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" className="mx-auto mb-3">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
@@ -93,41 +93,41 @@ export default function ClientTable({ clients }: ClientTableProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-800">Client Overview</h3>
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h3 className="font-semibold text-gray-800 dark:text-gray-200">Client Overview</h3>
         <span className="text-sm text-gray-400">{clients.length} clients</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+            <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
               {STATUS_ORDER.map(status => (
-                <th key={status} className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                <th key={status} className="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                   {status}
                 </th>
               ))}
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Flag</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Flag</th>
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {clients.map((client) => (
-              <tr key={client.id} className={`hover:bg-gray-50 transition-colors ${client.isFlagged ? 'bg-red-50 hover:bg-red-100' : ''}`}>
+              <tr key={client.id} className={`transition-colors ${client.isFlagged ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-[#10375C] bg-opacity-10 flex items-center justify-center text-[#10375C] font-bold text-sm flex-shrink-0">
                       {client.name[0].toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">{client.name}</div>
+                      <div className="font-semibold text-gray-900 dark:text-gray-100">{client.name}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-4 text-center">
-                  <span className="font-bold text-gray-900">{client.totalPosts}</span>
+                  <span className="font-bold text-gray-900 dark:text-gray-100">{client.totalPosts}</span>
                 </td>
                 {STATUS_ORDER.map(status => (
                   <td key={status} className="px-4 py-4 text-center">
@@ -144,7 +144,7 @@ export default function ClientTable({ clients }: ClientTableProps) {
                   <FlagBadge client={client} />
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-gray-400 dark:text-gray-500">
                     {format(new Date(client.created_at), 'MMM d, yyyy')}
                   </span>
                 </td>

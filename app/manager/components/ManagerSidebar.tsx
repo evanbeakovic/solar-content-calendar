@@ -91,7 +91,7 @@ function NavItem({
       } ${
         active
           ? 'bg-[#10375C] text-white'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
       }`}
     >
       <span className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px]">
@@ -312,7 +312,7 @@ export default function ManagerSidebar({
   const currentThemeOption = THEME_OPTIONS.find(o => o.mode === themeMode) || THEME_OPTIONS[0]
   const effectiveBuiltInGroups = getEffectiveBuiltInGroups()
 
-  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white border border-gray-200 text-gray-900 placeholder-gray-400'
+  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
 
   return (
     <div
@@ -320,11 +320,11 @@ export default function ManagerSidebar({
       style={{ width: isWide ? 240 : 56 }}
     >
       {/* Toggle + Wordmark */}
-      <div className={`flex items-center border-b border-gray-100 flex-shrink-0 ${isWide ? 'px-4 py-4 gap-3' : 'px-0 py-4 justify-center'}`}>
+      <div className={`flex items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 ${isWide ? 'px-4 py-4 gap-3' : 'px-0 py-4 justify-center'}`}>
         <button
           onClick={onToggleWidth}
           title="Toggle sidebar"
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
@@ -409,14 +409,14 @@ export default function ManagerSidebar({
         />
       </nav>
 
-      {isWide && <div className="mx-3 border-t border-gray-100 flex-shrink-0" />}
+      {isWide && <div className="mx-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0" />}
 
       {/* Settings */}
       <div className="px-2 py-2 flex-shrink-0">
         <button
           onClick={handleSettingsClick}
           title={!isWide ? 'Settings' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
@@ -451,14 +451,14 @@ export default function ManagerSidebar({
             <div>
               <button
                 onClick={() => setShowThemeMenu(v => !v)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   {currentThemeOption.icon}
                   <span>Theme</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-gray-400">{currentThemeOption.label}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{currentThemeOption.label}</span>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                     className={`transition-transform ${showThemeMenu ? 'rotate-180' : ''}`}>
                     <polyline points="6 9 12 15 18 9"/>
@@ -466,10 +466,10 @@ export default function ManagerSidebar({
                 </div>
               </button>
               {showThemeMenu && (
-                <div className="ml-2 mt-0.5 rounded-xl overflow-hidden border bg-gray-50 border-gray-100">
+                <div className="ml-2 mt-0.5 rounded-xl overflow-hidden border bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600">
                   {THEME_OPTIONS.map(opt => (
                     <button key={opt.mode} onClick={() => handleSetThemeMode(opt.mode)}
-                      className="w-full flex items-center justify-between px-4 py-2 text-sm transition-colors text-gray-700 hover:bg-gray-100">
+                      className="w-full flex items-center justify-between px-4 py-2 text-sm transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                       <div className="flex items-center gap-2.5">{opt.icon}{opt.label}</div>
                       {themeMode === opt.mode && (
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -486,7 +486,7 @@ export default function ManagerSidebar({
             <div>
               <button
                 onClick={() => setShowFormats(v => !v)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -502,19 +502,19 @@ export default function ManagerSidebar({
               </button>
 
               {showFormats && (
-                <div className="ml-2 mt-1 rounded-xl p-3 bg-gray-50 border border-gray-100 space-y-2">
+                <div className="ml-2 mt-1 rounded-xl p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 space-y-2">
                   {Object.entries(effectiveBuiltInGroups).map(([platform, items]) => (
                     <div key={platform}>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">{platform}</p>
+                      <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{platform}</p>
                       <div className="flex flex-wrap gap-1">
                         {items.map(({ key, format }) => (
                           <div key={key} className="relative">
                             <button
                               type="button"
                               onClick={() => setFormatMenu(formatMenu === key ? null : key)}
-                              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200 hover:bg-gray-200 transition-colors"
+                              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                             >
-                              <span className="text-[10px] text-gray-500 font-medium">{format}</span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">{format}</span>
                               <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                 <polyline points="6 9 12 15 18 9"/>
                               </svg>
@@ -522,18 +522,18 @@ export default function ManagerSidebar({
                             {formatMenu === key && (
                               <>
                                 <div className="fixed inset-0 z-10" onClick={() => setFormatMenu(null)} />
-                                <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[90px]">
+                                <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 z-20 min-w-[90px]">
                                   <button
                                     type="button"
                                     onClick={() => openEditBuiltIn(key)}
-                                    className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                                    className="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                   >
                                     Edit
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => { setBuiltInDeleted(prev => new Set([...prev, key])); setFormatMenu(null) }}
-                                    className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 transition-colors"
+                                    className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                   >
                                     Delete
                                   </button>
@@ -547,8 +547,8 @@ export default function ManagerSidebar({
                   ))}
 
                   {editBuiltInForm && (
-                    <div className="mt-2 rounded-xl p-3 bg-white border border-gray-200 space-y-3">
-                      <p className="text-xs font-semibold text-gray-700">Edit: {editBuiltInForm.platformLabel}</p>
+                    <div className="mt-2 rounded-xl p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 space-y-3">
+                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Edit: {editBuiltInForm.platformLabel}</p>
                       <div>
                         <p className="text-[10px] font-semibold text-gray-500 mb-1">Format name</p>
                         <input
@@ -617,13 +617,13 @@ export default function ManagerSidebar({
 
                   {/* Custom formats */}
                   {customFormats.length > 0 && (
-                    <div className="space-y-1 pt-1 border-t border-gray-100">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Custom</p>
+                    <div className="space-y-1 pt-1 border-t border-gray-200 dark:border-gray-600">
+                      <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Custom</p>
                       {customFormats.map((rule, idx) => (
-                        <div key={idx} className="flex items-center justify-between px-2 py-1.5 rounded-lg border border-gray-100 bg-white">
+                        <div key={idx} className="flex items-center justify-between px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900">
                           <div>
-                            <p className="text-xs font-semibold text-gray-800">{rule.format}</p>
-                            <p className="text-[10px] text-gray-400">{rule.platforms.join(', ')}</p>
+                            <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{rule.format}</p>
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500">{rule.platforms.join(', ')}</p>
                           </div>
                           <button onClick={() => handleDeleteCustom(idx)}
                             className="w-5 h-5 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
@@ -720,12 +720,12 @@ export default function ManagerSidebar({
       <div className="flex-1" />
 
       {/* Bottom: Profile + Sign Out */}
-      <div className="px-2 pb-4 flex-shrink-0 border-t border-gray-100 pt-2 space-y-0.5">
+      <div className="px-2 pb-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-2 space-y-0.5">
         {/* Profile */}
         <button
           onClick={handleProfileClick}
           title={!isWide ? 'Profile' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
@@ -756,7 +756,7 @@ export default function ManagerSidebar({
         </button>
 
         {isWide && showProfile && (
-          <div className="mx-1 mt-1 mb-2 rounded-xl p-4 bg-gray-50 border border-gray-100">
+          <div className="mx-1 mt-1 mb-2 rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
             <p className="text-xs font-semibold mb-3 text-gray-500">Change password</p>
             <form onSubmit={handlePasswordChange} className="space-y-2.5">
               <div className="relative">
@@ -790,7 +790,7 @@ export default function ManagerSidebar({
         <button
           onClick={handleLogout}
           title={!isWide ? 'Sign out' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 hover:bg-red-50 hover:text-red-600 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >

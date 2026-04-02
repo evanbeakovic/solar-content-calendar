@@ -340,13 +340,13 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
   const imageUrl = getImageUrl(currentImagePath)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-gray-200 dark:border-gray-700">
 
         {/* Sticky header */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Edit Post</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Edit Post</h2>
             {selectedPlatforms.length > 0 && form.format ? (
               <p className="text-xs text-[#10375C] font-semibold mt-0.5">
                 {getPlatformLabel(selectedPlatforms, form.format)}
@@ -371,11 +371,11 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               {showHeaderMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowHeaderMenu(false)} />
-                  <div className="absolute top-full mt-1 right-0 w-44 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 py-1.5 overflow-hidden">
+                  <div className="absolute top-full mt-1 right-0 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 py-1.5 overflow-hidden">
                     <button
                       onClick={handleDuplicate}
                       disabled={loading}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="9" y="9" width="13" height="13" rx="2"/>
@@ -383,7 +383,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                       </svg>
                       {loading ? 'Duplicating...' : 'Duplicate'}
                     </button>
-                    <div className="border-t border-gray-100 mt-1 pt-1">
+                    <div className="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1">
                       {!showDeleteConfirm ? (
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
@@ -409,7 +409,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirm(false)}
-                              className="flex-1 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
+                              className="flex-1 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                             >
                               Cancel
                             </button>
@@ -442,7 +442,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                 <button
                   type="button"
                   onClick={() => setShowFormatDropdown(v => !v)}
-                  className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 >
                   {form.format || 'Select Format'}
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -456,7 +456,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                 {showFormatDropdown && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowFormatDropdown(false)} />
-                    <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-20 min-w-[120px]">
+                    <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20 min-w-[120px]">
                       {getAvailableFormats().map(f => (
                         <button
                           key={f}
@@ -468,7 +468,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                             setShowFormatDropdown(false)
                           }}
                           className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                            form.format === f ? 'text-[#10375C] font-semibold bg-[#10375C]/5' : 'text-gray-700 hover:bg-gray-50'
+                            form.format === f ? 'text-[#10375C] font-semibold bg-[#10375C]/5' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                           } ${f === 'Post' && localImages.length > 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           {f}
@@ -637,7 +637,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
             {/* YouTube Thumbnail — Bug F drag-and-drop added */}
             {selectedPlatforms.includes('YouTube') && (form.format === 'Video' || form.format === 'Thumbnail') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">YouTube Thumbnail</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">YouTube Thumbnail</label>
                 <div
                   onDragOver={e => { e.preventDefault(); setYtDragActive(true) }}
                   onDragEnter={e => { e.preventDefault(); setYtDragActive(true) }}
@@ -714,35 +714,35 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
               <select value={form.status} onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white">
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
                 {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
 
             {/* Client */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Client</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Client</label>
               <select value={form.client_id} onChange={(e) => handleChange('client_id', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white">
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
                 {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
               </select>
             </div>
 
             {/* Platforms */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Platform</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platform</label>
               <div className="flex flex-wrap gap-2">
                 {PLATFORMS.map(p => (
-                  <label key={p} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <label key={p} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <input
                       type="checkbox"
                       checked={selectedPlatforms.includes(p)}
                       onChange={() => togglePlatform(p)}
                       className="w-4 h-4 rounded accent-[#10375C]"
                     />
-                    <span className="text-sm text-gray-700">{p}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{p}</span>
                   </label>
                 ))}
               </div>
@@ -750,63 +750,63 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
 
             {/* Scheduled Date (Bug D: format select removed — now handled by subheading dropdown above) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Scheduled Date</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Scheduled Date</label>
               <input type="date" value={form.scheduled_date} onChange={(e) => handleChange('scheduled_date', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Content Pillar */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Content Pillar</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Content Pillar</label>
               <input type="text" value={form.content_pillar} onChange={(e) => handleChange('content_pillar', e.target.value)}
                 placeholder="e.g. Education, Promotion"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Headline */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Headline</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Headline</label>
               <input type="text" value={form.headline} onChange={(e) => handleChange('headline', e.target.value)}
                 placeholder="Post headline..."
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Body Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Body Text</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Body Text</label>
               <textarea value={form.body_text} onChange={(e) => handleChange('body_text', e.target.value)}
                 placeholder="Main body content..." rows={3}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 resize-none" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 resize-none" />
             </div>
 
             {/* CTA */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Call to Action</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Call to Action</label>
               <input type="text" value={form.cta} onChange={(e) => handleChange('cta', e.target.value)}
                 placeholder="e.g. Shop Now, Learn More, Book Today"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Caption */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Caption</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Caption</label>
               <textarea value={form.caption} onChange={(e) => handleChange('caption', e.target.value)}
                 placeholder="Social media caption..." rows={3}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 resize-none" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 resize-none" />
             </div>
 
             {/* Hashtags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Hashtags</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Hashtags</label>
               <input type="text" value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)}
                 placeholder="#brand #marketing"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Row: Background Color + Visual Direction */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Background Color</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Background Color</label>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 relative overflow-hidden"
@@ -830,17 +830,17 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                 <p className="text-xs text-gray-400 mt-1">Type a hex code or click the swatch to pick</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Visual Direction</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Visual Direction</label>
                 <input type="text" value={form.visual_direction} onChange={(e) => handleChange('visual_direction', e.target.value)}
                   placeholder="Visual style notes..."
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900" />
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
               </div>
             </div>
           </form>
         </div>
 
         {/* Sticky footer — always visible Save button */}
-        <div className="flex-shrink-0 border-t border-gray-100 px-6 py-4 rounded-b-2xl bg-white">
+        <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 px-6 py-4 rounded-b-2xl bg-white dark:bg-gray-900">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-3">{error}</div>
           )}
@@ -893,20 +893,20 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
       {/* Validation popup — incompatible aspect ratio */}
       {validationPopup && (
         <div className="absolute inset-0 flex items-center justify-center z-60 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-            <h3 className="text-base font-bold text-gray-900 mb-1">Incompatible aspect ratio</h3>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-gray-200 dark:border-gray-700">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Incompatible aspect ratio</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               This file&apos;s aspect ratio is not compatible with{' '}
-              <span className="font-semibold text-gray-900">{validationPopup.incompatiblePlatforms.join(', ')}</span>.
+              <span className="font-semibold text-gray-900 dark:text-white">{validationPopup.incompatiblePlatforms.join(', ')}</span>.
               {' '}These platforms have been automatically removed.
             </p>
             {validationPopup.suggestedFormats.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Switch to a compatible format?</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Switch to a compatible format?</label>
                 <select
                   value={validationPopup.selectedSuggestedFormat}
                   onChange={e => setValidationPopup(prev => prev ? { ...prev, selectedSuggestedFormat: e.target.value } : null)}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#10375C]"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#10375C]"
                 >
                   <option value="">— Keep current format ({form.format}) —</option>
                   {validationPopup.suggestedFormats.map(f => <option key={f} value={f}>{f}</option>)}
@@ -930,7 +930,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               </button>
               <button
                 onClick={() => { setValidationPopup(null); pendingFilesRef.current = null }}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all text-sm"
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-sm"
               >
                 Cancel upload
               </button>
@@ -942,13 +942,13 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
       {/* Unsaved changes popup */}
       {showUnsavedChanges && (
         <div className="absolute inset-0 flex items-center justify-center z-60 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-            <h3 className="text-base font-bold text-gray-900 mb-1">Unsaved changes</h3>
-            <p className="text-sm text-gray-500 mb-5">You have unsaved changes. Would you like to save or discard them?</p>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-gray-200 dark:border-gray-700">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Unsaved changes</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">You have unsaved changes. Would you like to save or discard them?</p>
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all text-sm"
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-sm"
               >
                 Discard
               </button>

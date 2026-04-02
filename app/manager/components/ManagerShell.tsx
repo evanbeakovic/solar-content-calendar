@@ -50,7 +50,7 @@ export default function ManagerShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0a0f1a]">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       <ManagerSidebar
         profile={profile}
         isWide={isWide}

@@ -111,7 +111,7 @@ function ClientFilterDropdown({ clients, selected, onChange }: {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:border-gray-300 transition-colors min-w-[160px]"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500 transition-colors min-w-[160px]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -125,13 +125,13 @@ function ClientFilterDropdown({ clients, selected, onChange }: {
       </button>
 
       {open && (
-        <div className="absolute top-full mt-2 left-0 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 z-30 p-2">
-          <label className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 cursor-pointer border-b border-gray-100 mb-1">
+        <div className="absolute top-full mt-2 left-0 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 z-30 p-2">
+          <label className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 mb-1">
             <input type="checkbox" checked={allSelected} onChange={toggleAll} className="w-4 h-4 rounded accent-[#10375C]" />
-            <span className="text-sm font-semibold text-gray-700">Select All</span>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Select All</span>
           </label>
           {clients.map(c => (
-            <label key={c.id} className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 cursor-pointer">
+            <label key={c.id} className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
               <input type="checkbox" checked={selected.includes(c.id)} onChange={() => toggleOne(c.id)} className="w-4 h-4 rounded accent-[#10375C]" />
               <div className="flex items-center gap-2 flex-1">
                 {getLogoUrl(c.logo_path) ? (
@@ -141,7 +141,7 @@ function ClientFilterDropdown({ clients, selected, onChange }: {
                     {c.name[0]}
                   </div>
                 )}
-                <span className="text-sm text-gray-700">{c.name}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{c.name}</span>
               </div>
             </label>
           ))}
@@ -442,7 +442,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
         <div>
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-500 text-sm">{posts.length} total posts</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{posts.length} total posts</p>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowCSVImport(true)}
@@ -464,7 +464,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
               </button>
               <button
                 onClick={() => setView('preview')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 hover:border-gray-300 hover:text-gray-800 transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-all"
               >
                 Client Preview
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -475,13 +475,13 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
           </div>
 
           {/* Filters bar */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5 flex flex-wrap items-center gap-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5 flex flex-wrap items-center gap-4">
             <ClientFilterDropdown
               clients={clients}
               selected={selectedClients}
               onChange={setSelectedClients}
             />
-            <div className="w-px h-8 bg-gray-200 hidden sm:block" />
+            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
             <div className="flex items-center gap-1.5 flex-wrap">
               {PERIOD_OPTIONS.map(opt => (
                 <button
@@ -490,7 +490,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     period === opt.value
                       ? 'bg-[#10375C] text-white shadow-sm'
-                      : 'text-gray-500 hover:bg-gray-100'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   {opt.label}
@@ -503,14 +503,14 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
                   type="date"
                   value={customFrom}
                   onChange={e => setCustomFrom(e.target.value)}
-                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#10375C]/20"
+                  className="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#10375C]/20"
                 />
                 <span className="text-gray-400 text-xs">to</span>
                 <input
                   type="date"
                   value={customTo}
                   onChange={e => setCustomTo(e.target.value)}
-                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#10375C]/20"
+                  className="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#10375C]/20"
                 />
               </div>
             )}
@@ -520,7 +520,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as SortBy)}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#10375C]/20 font-medium cursor-pointer"
+                className="px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#10375C]/20 font-medium cursor-pointer"
               >
                 <option value="date-asc">Post Date: Oldest First</option>
                 <option value="date-desc">Post Date: Newest First</option>
@@ -543,13 +543,13 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                     isActive
                       ? `${styles.active} border-transparent shadow-sm`
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
+                      : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : styles.dot}`} />
                   {status}
                   <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+                    isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                   }`}>
                     {count}
                   </span>
@@ -560,16 +560,16 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
 
           {/* Posts grid */}
           {uniquePosts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-4">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="2"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
               </div>
-              <p className="text-gray-400 font-medium">No posts in &quot;{activeStatus}&quot;</p>
-              <p className="text-gray-300 text-sm mt-1">Try changing the filters or time period</p>
+              <p className="text-gray-400 dark:text-gray-500 font-medium">No posts in &quot;{activeStatus}&quot;</p>
+              <p className="text-gray-300 dark:text-gray-600 text-sm mt-1">Try changing the filters or time period</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
@@ -674,12 +674,12 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Client Preview</h2>
-              <p className="text-sm text-gray-500 mt-0.5">Preview the content pipeline from a client perspective</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Client Preview</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Preview the content pipeline from a client perspective</p>
             </div>
             <button
               onClick={() => setView('manage')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 hover:border-gray-300 hover:text-gray-800 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-all"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="15 18 9 12 15 6"/>

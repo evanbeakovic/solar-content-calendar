@@ -217,21 +217,21 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
   const selectedClient = clients.find(c => c.id === selectedClientId)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-700">
         {/* Header */}
-        <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
               {step === 'duplicates' ? 'Duplicate Posts Found' : 'Import Posts from CSV'}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {step === 'upload' && 'Select a client and upload your CSV file'}
               {step === 'preview' && `${parsedRows.length} posts ready to import for ${selectedClient?.name}`}
               {step === 'duplicates' && `${duplicates.length} post${duplicates.length !== 1 ? 's' : ''} already exist in the system`}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -252,11 +252,11 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
           {step === 'upload' && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Client <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Select Client <span className="text-red-500">*</span></label>
                 <select
                   value={selectedClientId}
                   onChange={(e) => setSelectedClientId(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 bg-white"
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
                 >
                   <option value="">Choose a client...</option>
                   {clients.map(client => (
@@ -265,11 +265,11 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
                 </select>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-blue-800 mb-2">Expected CSV Columns</h4>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Expected CSV Columns</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {['Date', 'Day', 'Platform', 'Format', 'Pillar', 'Caption', 'Heading', 'Body', 'CTA', 'Background', 'Visual Direction', 'Hashtag'].map(col => (
-                    <span key={col} className="text-xs bg-white border border-blue-200 text-blue-700 px-2 py-0.5 rounded-lg font-mono">
+                    <span key={col} className="text-xs bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-lg font-mono">
                       {col}
                     </span>
                   ))}
@@ -281,16 +281,16 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
                 className={`border-2 border-dashed rounded-xl p-10 text-center transition-all ${
                   selectedClientId
                     ? 'border-[#10375C] border-opacity-30 hover:border-opacity-60 cursor-pointer hover:bg-[#10375C] hover:bg-opacity-5'
-                    : 'border-gray-200 cursor-not-allowed opacity-50'
+                    : 'border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-50'
                 }`}
               >
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10375C" strokeWidth="1.5" className="mx-auto mb-3 opacity-50">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                 </svg>
-                <p className="text-gray-600 font-medium">
+                <p className="text-gray-600 dark:text-gray-300 font-medium">
                   {selectedClientId ? 'Click to upload CSV file' : 'Select a client first'}
                 </p>
-                <p className="text-gray-400 text-sm mt-1">Supports .csv files</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Supports .csv files</p>
               </div>
               <input
                 ref={fileInputRef}
@@ -317,40 +317,40 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => { setStep('upload'); setParsedRows([]); setFileName('') }}
-                    className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="15 18 9 12 15 6"/>
                     </svg>
                     Back
                   </button>
-                  <span className="text-sm font-medium text-gray-900">{parsedRows.length} posts to import</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{parsedRows.length} posts to import</span>
                 </div>
               </div>
 
-              <div className="overflow-x-auto rounded-xl border border-gray-200">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">#</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Date</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Platform</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Format</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Heading</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Caption</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">CTA</th>
+                    <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">#</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Platform</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Format</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Heading</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Caption</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">CTA</th>
                     </tr>
                   </thead>
                   <tbody>
                     {parsedRows.map((row, idx) => (
-                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-3 py-2 text-gray-400">{idx + 1}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{row.scheduled_date}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{row.platform}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{row.format}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate">{row.headline}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate">{row.caption}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{row.cta}</td>
+                      <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td className="px-3 py-2 text-gray-400 dark:text-gray-500">{idx + 1}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{row.scheduled_date}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{row.platform}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{row.format}</td>
+                        <td className="px-3 py-2 max-w-[200px] truncate text-gray-700 dark:text-gray-300">{row.headline}</td>
+                        <td className="px-3 py-2 max-w-[200px] truncate text-gray-700 dark:text-gray-300">{row.caption}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{row.cta}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -362,37 +362,37 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
           {step === 'duplicates' && (
             <div className="space-y-5">
               {insertedPosts.length > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-300">
                   <strong>{insertedPosts.length}</strong> new post{insertedPosts.length !== 1 ? 's' : ''} were successfully imported.
                 </div>
               )}
 
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-sm font-semibold text-amber-800 mb-1">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-4">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
                   {duplicates.length} post{duplicates.length !== 1 ? 's' : ''} already exist in the system
                 </p>
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-amber-700 dark:text-amber-400">
                   These posts match an existing post with the same client, date, platform, and headline. What would you like to do?
                 </p>
               </div>
 
-              <div className="overflow-x-auto rounded-xl border border-gray-200">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">#</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Date</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Platform</th>
-                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 whitespace-nowrap">Heading</th>
+                    <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">#</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Platform</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">Heading</th>
                     </tr>
                   </thead>
                   <tbody>
                     {duplicates.map((dup, idx) => (
-                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-3 py-2 text-gray-400">{idx + 1}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{dup.scheduled_date}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{dup.platform}</td>
-                        <td className="px-3 py-2 max-w-[300px] truncate">{dup.headline}</td>
+                      <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td className="px-3 py-2 text-gray-400 dark:text-gray-500">{idx + 1}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{dup.scheduled_date}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-gray-700 dark:text-gray-300">{dup.platform}</td>
+                        <td className="px-3 py-2 max-w-[300px] truncate text-gray-700 dark:text-gray-300">{dup.headline}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -400,16 +400,16 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
               </div>
 
               {replaceErrors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                  <p className="text-sm font-semibold text-red-700 mb-2">{replaceErrors.length} post{replaceErrors.length !== 1 ? 's' : ''} failed to update:</p>
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl p-4">
+                  <p className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">{replaceErrors.length} post{replaceErrors.length !== 1 ? 's' : ''} failed to update:</p>
                   <ul className="space-y-1">
                     {replaceErrors.map((err, i) => (
-                      <li key={i} className="text-xs text-red-600">{err}</li>
+                      <li key={i} className="text-xs text-red-600 dark:text-red-400">{err}</li>
                     ))}
                   </ul>
                   <button
                     onClick={() => onImported(insertedPosts, localReplacedPosts)}
-                    className="mt-3 text-xs font-semibold text-red-700 underline hover:no-underline"
+                    className="mt-3 text-xs font-semibold text-red-700 dark:text-red-400 underline hover:no-underline"
                   >
                     Continue with {insertedPosts.length + localReplacedPosts.length} successfully imported post{insertedPosts.length + localReplacedPosts.length !== 1 ? 's' : ''}
                   </button>
@@ -423,7 +423,7 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
 
         {/* Footer */}
         {step === 'duplicates' && (
-          <div className="border-t border-gray-100 px-6 py-4 flex gap-3 flex-wrap">
+          <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex gap-3 flex-wrap">
             <button
               onClick={handleAddAsCopy}
               disabled={loading}
@@ -441,17 +441,17 @@ export default function CSVImportModal({ clients, onClose, onImported }: CSVImpo
             <button
               onClick={handleSkipDuplicates}
               disabled={loading}
-              className="flex-1 min-w-[120px] py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all text-sm disabled:opacity-50"
+              className="flex-1 min-w-[120px] py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-sm disabled:opacity-50"
             >
               Skip Duplicates
             </button>
           </div>
         )}
         {step !== 'duplicates' && (
-          <div className="border-t border-gray-100 px-6 py-4 flex gap-3">
+          <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
             >
               Cancel
             </button>

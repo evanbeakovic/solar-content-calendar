@@ -142,7 +142,7 @@ export default function SMMSidebar({
   const passwordsMatch = newPassword.length > 0 && confirmPassword === newPassword
   const currentThemeOption = THEME_OPTIONS.find(o => o.mode === themeMode) || THEME_OPTIONS[0]
 
-  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white border border-gray-200 text-gray-900 placeholder-gray-400'
+  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
 
   return (
     <div
@@ -150,11 +150,11 @@ export default function SMMSidebar({
       style={{ width: isWide ? 240 : 56 }}
     >
       {/* Toggle + Wordmark */}
-      <div className={`flex items-center border-b border-gray-100 flex-shrink-0 ${isWide ? 'px-4 py-4 gap-3' : 'px-0 py-4 justify-center'}`}>
+      <div className={`flex items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 ${isWide ? 'px-4 py-4 gap-3' : 'px-0 py-4 justify-center'}`}>
         <button
           onClick={onToggleWidth}
           title="Toggle sidebar"
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
@@ -208,14 +208,14 @@ export default function SMMSidebar({
         </button>
       </nav>
 
-      {isWide && <div className="mx-3 border-t border-gray-100 flex-shrink-0" />}
+      {isWide && <div className="mx-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0" />}
 
       {/* Settings */}
       <div className="px-2 py-2 flex-shrink-0">
         <button
           onClick={handleSettingsClick}
           title={!isWide ? 'Settings' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
@@ -248,14 +248,14 @@ export default function SMMSidebar({
           <div className="ml-2 mt-1 space-y-0.5">
             <button
               onClick={() => setShowThemeMenu(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 {currentThemeOption.icon}
                 <span>Theme</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-400">{currentThemeOption.label}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{currentThemeOption.label}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                   className={`transition-transform ${showThemeMenu ? 'rotate-180' : ''}`}>
                   <polyline points="6 9 12 15 18 9"/>
@@ -263,10 +263,10 @@ export default function SMMSidebar({
               </div>
             </button>
             {showThemeMenu && (
-              <div className="ml-2 mt-0.5 rounded-xl overflow-hidden border bg-gray-50 border-gray-100">
+              <div className="ml-2 mt-0.5 rounded-xl overflow-hidden border bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600">
                 {THEME_OPTIONS.map(opt => (
                   <button key={opt.mode} onClick={() => handleSetThemeMode(opt.mode)}
-                    className="w-full flex items-center justify-between px-4 py-2 text-sm transition-colors text-gray-700 hover:bg-gray-100">
+                    className="w-full flex items-center justify-between px-4 py-2 text-sm transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                     <div className="flex items-center gap-2.5">{opt.icon}{opt.label}</div>
                     {themeMode === opt.mode && (
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -285,12 +285,12 @@ export default function SMMSidebar({
       <div className="flex-1" />
 
       {/* Bottom: Profile + Sign Out */}
-      <div className="px-2 pb-4 flex-shrink-0 border-t border-gray-100 pt-2 space-y-0.5">
+      <div className="px-2 pb-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-2 space-y-0.5">
         {/* Profile */}
         <button
           onClick={handleProfileClick}
           title={!isWide ? 'Profile' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
@@ -321,8 +321,8 @@ export default function SMMSidebar({
         </button>
 
         {isWide && showProfile && (
-          <div className="mx-1 mt-1 mb-2 rounded-xl p-4 bg-gray-50 border border-gray-100">
-            <p className="text-xs font-semibold mb-3 text-gray-500">Change password</p>
+          <div className="mx-1 mt-1 mb-2 rounded-xl p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+            <p className="text-xs font-semibold mb-3 text-gray-500 dark:text-gray-400">Change password</p>
             <form onSubmit={handlePasswordChange} className="space-y-2.5">
               <div className="relative">
                 <input type="password" placeholder="Current password" value={currentPassword}
@@ -355,7 +355,7 @@ export default function SMMSidebar({
         <button
           onClick={handleLogout}
           title={!isWide ? 'Sign out' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 hover:bg-red-50 hover:text-red-600 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
