@@ -142,7 +142,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
             <Image src={imageUrl} alt={post.headline || 'Post image'} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
         ) : (
-          <div className="aspect-square w-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <div className="aspect-square w-full bg-gray-200 dark:bg-[#1a2436] flex items-center justify-center">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-400 dark:text-gray-500">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -283,25 +283,25 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
         {hasChangeRequest && (
           <div className="mb-2" onClick={e => e.stopPropagation()}>
             {isFixed ? (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-green-50 border border-green-200">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
-                <p className="text-xs text-green-700 font-medium">Request fixed ✓</p>
+                <p className="text-xs text-green-700 dark:text-green-400 font-medium">Request fixed ✓</p>
               </div>
             ) : (
               <button
                 onClick={e => { e.stopPropagation(); setShowRequestNoteModal(true) }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
               >
-                <p className="text-xs leading-snug text-amber-800">
+                <p className="text-xs leading-snug text-amber-800 dark:text-amber-300">
                   <span className="font-bold">Client request:</span>{' '}
                   {(post.change_request_note || '').length > 80
                     ? post.change_request_note!.slice(0, 80) + '…'
                     : post.change_request_note}
                 </p>
                 {hasChangeImages && (
-                  <span className="flex items-center gap-0.5 mt-0.5 text-[10px] text-amber-600">
+                  <span className="flex items-center gap-0.5 mt-0.5 text-[10px] text-amber-600 dark:text-amber-400">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>

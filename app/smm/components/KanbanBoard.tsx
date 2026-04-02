@@ -115,7 +115,7 @@ function ClientDropdown({ clients, selected, onChange }: {
                   className="w-4 h-4 rounded accent-[#10375C]"
                 />
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-[#10375C]/10 flex items-center justify-center text-[#10375C] text-xs font-bold">
+                  <div className="w-5 h-5 rounded-md bg-[#10375C]/10 dark:bg-[#10375C]/40 flex items-center justify-center text-[#10375C] dark:text-[#8EE3E3] text-xs font-bold">
                     {c.name[0]}
                   </div>
                   <span className="text-sm text-gray-700 dark:text-gray-200">{c.name}</span>
@@ -459,8 +459,8 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
               <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
-          <p className="text-gray-400 font-medium">No posts in &quot;{activeStatus}&quot;</p>
-          <p className="text-gray-300 text-sm mt-1">Try changing the filters or time period</p>
+          <p className="text-gray-400 dark:text-gray-500 font-medium">No posts in &quot;{activeStatus}&quot;</p>
+          <p className="text-gray-300 dark:text-gray-600 text-sm mt-1">Try changing the filters or time period</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
