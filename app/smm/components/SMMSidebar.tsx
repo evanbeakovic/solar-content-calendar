@@ -142,7 +142,7 @@ export default function SMMSidebar({
   const passwordsMatch = newPassword.length > 0 && confirmPassword === newPassword
   const currentThemeOption = THEME_OPTIONS.find(o => o.mode === themeMode) || THEME_OPTIONS[0]
 
-  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+  const inputClass = 'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#10375C]/30 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400'
 
   return (
     <div
@@ -285,7 +285,7 @@ export default function SMMSidebar({
       <div className="flex-1" />
 
       {/* Bottom: Profile + Sign Out */}
-      <div className="px-2 pb-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-2 space-y-0.5">
+      <div className="px-2 pb-8 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-2 space-y-0.5">
         {/* Profile */}
         <button
           onClick={handleProfileClick}
@@ -355,7 +355,7 @@ export default function SMMSidebar({
         <button
           onClick={handleLogout}
           title={!isWide ? 'Sign out' : undefined}
-          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 ${
+          className={`relative group w-full flex items-center rounded-xl transition-colors text-red-400 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-300 dark:hover:text-red-300 ${
             isWide ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'
           }`}
         >
