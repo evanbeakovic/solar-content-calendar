@@ -333,7 +333,7 @@ export default function ManagerSidebar({
           </svg>
         </button>
         {isWide && (
-          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap">Solar App</span>
+          <span className="text-sm font-bold text-blue-900 dark:text-white tracking-tight whitespace-nowrap">Solar App</span>
         )}
       </div>
 

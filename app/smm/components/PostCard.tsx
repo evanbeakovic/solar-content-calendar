@@ -353,7 +353,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           {nextStatus && (
             <button
               onClick={handleAdvanceStatus}
-              className="w-full text-xs py-1.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1 border border-slate-600 dark:border-slate-500 bg-slate-700/50 dark:bg-slate-700/60 text-slate-200 dark:text-slate-200 hover:bg-slate-600/60 dark:hover:bg-slate-600/60"
+              className="w-full text-xs py-1.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600"
             >
               {post.status === 'Requested Changes' ? (
                 <>
@@ -374,7 +374,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           )}
 
           {post.status === 'Posted' && (
-            <div className="w-full text-xs py-1.5 rounded-lg font-medium text-center border border-slate-600 dark:border-slate-500 text-slate-300 dark:text-slate-300">
+            <div className="w-full text-xs py-1.5 rounded-lg font-medium text-center border border-gray-200 dark:border-slate-500 text-gray-400 dark:text-slate-300">
               Posted
             </div>
           )}

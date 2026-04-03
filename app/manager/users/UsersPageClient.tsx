@@ -594,7 +594,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                     <tr key={profile.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gray-500 dark:bg-gray-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gray-100 dark:bg-slate-600 flex items-center justify-center text-gray-700 dark:text-white font-bold text-sm flex-shrink-0">
                             {profile.full_name ? profile.full_name[0].toUpperCase() : profile.email[0].toUpperCase()}
                           </div>
                           <div>
@@ -677,7 +677,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                       <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-600 dark:bg-slate-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#10375C]/10 dark:bg-slate-600 flex items-center justify-center text-[#10375C] dark:text-white font-bold text-sm flex-shrink-0">
                               {logoUrl ? (
                                 <img src={logoUrl} alt={client.name} className="w-full h-full object-cover" />
                               ) : (

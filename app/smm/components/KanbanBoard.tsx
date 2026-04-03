@@ -114,7 +114,7 @@ function ClientDropdown({ clients, selected, onChange }: {
                   className="w-4 h-4 rounded accent-[#10375C]"
                 />
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-5 h-5 rounded-md bg-[#10375C]/10 dark:bg-slate-600 flex items-center justify-center text-[#10375C] dark:text-white text-xs font-bold">
                     {c.name[0]}
                   </div>
                   <span className="text-sm text-gray-700 dark:text-gray-200">{c.name}</span>
