@@ -10,14 +10,12 @@ import PostCard from '@/app/smm/components/PostCard'
 import NewPostModal from '@/app/smm/components/NewPostModal'
 import EditPostModal from '@/app/smm/components/EditPostModal'
 import CSVImportModal from '@/app/smm/components/CSVImportModal'
-import ContentView from '@/app/client/components/ContentView'
 
 interface ManagerPostsTabProps {
   initialPosts: Post[]
   clients: Client[]
 }
 
-type View = 'manage' | 'preview'
 type Period = 'this-week' | 'next-week' | '2-weeks' | 'this-month' | 'custom' | 'all'
 type SortBy = 'date-asc' | 'date-desc' | 'added-asc' | 'added-desc'
 
@@ -147,98 +145,9 @@ function ClientFilterDropdown({ clients, selected, onChange }: {
   )
 }
 
-// ── Client Preview Dropdown (multi-select with logos) ────────────
-function ClientPreviewDropdown({ clients, selected, onChange }: {
-  clients: Client[]
-  selected: string[]
-  onChange: (ids: string[]) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  const allSelected = selected.length === clients.length
-  const label = allSelected
-    ? 'All Clients'
-    : selected.length === 0
-    ? 'No Clients'
-    : selected.length === 1
-    ? clients.find(c => c.id === selected[0])?.name || '1 Client'
-    : `${selected.length} Clients`
-
-  function toggleAll() { onChange(allSelected ? [] : clients.map(c => c.id)) }
-  function toggleOne(id: string) {
-    onChange(selected.includes(id) ? selected.filter(x => x !== id) : [...selected, id])
-  }
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm font-semibold text-gray-200 hover:bg-gray-700 transition-colors min-w-[200px]"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-        </svg>
-        <span className="flex-1 text-left">{label}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
-
-      {open && (
-        <div className="absolute top-full mt-2 left-0 w-64 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 z-30 p-2">
-          <label className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-700 cursor-pointer border-b border-gray-700 mb-1">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={toggleAll}
-              className="w-4 h-4 rounded accent-[#8EE3E3]"
-            />
-            <span className="text-sm font-semibold text-gray-200">Select All</span>
-          </label>
-          {clients.map(c => {
-            const logoUrl = getLogoUrl(c.logo_path)
-            return (
-              <label key={c.id} className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-700 cursor-pointer">
-                {logoUrl ? (
-                  <img src={logoUrl} alt={c.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-[#10375C]/40 flex items-center justify-center text-[#8EE3E3] text-xs font-bold flex-shrink-0">
-                    {c.name[0]}
-                  </div>
-                )}
-                <span className="text-sm text-gray-200 flex-1">{c.name}</span>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(c.id)}
-                  onChange={() => toggleOne(c.id)}
-                  className="w-4 h-4 rounded accent-[#8EE3E3] flex-shrink-0"
-                />
-              </label>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ── Main Component ───────────────────────────────────────────────
 export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsTabProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
-  const [view, setView] = useState<View>('manage')
-
-  // Manage Posts state
   const [activeStatus, setActiveStatus] = useState<PostStatus>('Uploads')
   const [selectedClients, setSelectedClients] = useState<string[]>(clients.map(c => c.id))
   const [period, setPeriod] = useState<Period>('all')
@@ -252,9 +161,6 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
   // Bulk selection state
   const [selectedPostIds, setSelectedPostIds] = useState<Set<string>>(new Set())
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false)
-
-  // Client Preview state
-  const [previewSelectedClients, setPreviewSelectedClients] = useState<string[]>(clients.map(c => c.id))
 
   // ── Filtering ────────────────────────────────────────────────
   const periodRange = getPeriodRange(period, customFrom, customTo)
@@ -431,9 +337,6 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
   // ── Render ────────────────────────────────────────────────────
   return (
     <div>
-      {/* ── Manage Posts view ─────────────────────────────────── */}
-      {view === 'manage' && (
-        <div>
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <p className="text-gray-500 dark:text-gray-400 text-sm">{posts.length} total posts</p>
@@ -455,15 +358,6 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
                 New Post
-              </button>
-              <button
-                onClick={() => setView('preview')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-all"
-              >
-                Client Preview
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
               </button>
             </div>
           </div>
@@ -657,74 +551,6 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* ── Client Preview view ───────────────────────────────── */}
-      {view === 'preview' && (
-        <div>
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Client Preview</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Preview the content pipeline from a client perspective</p>
-            </div>
-            <button
-              onClick={() => setView('manage')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition-all"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6"/>
-              </svg>
-              Manage Posts
-            </button>
-          </div>
-
-          {/* Client selector */}
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5 mb-5">
-            <p className="text-sm font-semibold text-gray-300 mb-3">Select Clients to Preview</p>
-            <ClientPreviewDropdown
-              clients={clients}
-              selected={previewSelectedClients}
-              onChange={setPreviewSelectedClients}
-            />
-            {previewSelectedClients.length > 0 && previewSelectedClients.length < clients.length && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {previewSelectedClients.map(id => {
-                  const c = clients.find(cl => cl.id === id)
-                  if (!c) return null
-                  const logoUrl = getLogoUrl(c.logo_path)
-                  return (
-                    <div key={id} className="flex items-center gap-1.5 bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1">
-                      {logoUrl ? (
-                        <img src={logoUrl} alt={c.name} className="w-4 h-4 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full bg-[#10375C]/50 flex items-center justify-center text-[#8EE3E3] text-xs font-bold">
-                          {c.name[0]}
-                        </div>
-                      )}
-                      <span className="text-xs text-gray-300 font-medium">{c.name}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Read-only ContentView preview */}
-          <div className="rounded-2xl bg-[#0a0f1a] overflow-hidden">
-            <ContentView
-              posts={posts}
-              clients={clients}
-              activeClientIds={previewSelectedClients}
-              theme="dark"
-              onPostUpdated={() => {}}
-              readOnly
-            />
-          </div>
-        </div>
-      )}
-
       {/* ── Modals ────────────────────────────────────────────── */}
       {showNewPost && (
         <NewPostModal
