@@ -249,7 +249,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           </span>
           {post.platform && (
             <span
-              className="text-xs px-1.5 py-0.5 rounded-md font-medium inline-block mt-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+              className="text-xs px-1.5 py-0.5 rounded-md font-medium inline-block mt-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300"
               title={badgeLabel || ''}
             >
               {badgeLabel}
@@ -353,12 +353,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           {nextStatus && (
             <button
               onClick={handleAdvanceStatus}
-              className="w-full text-xs py-1.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1 border"
-              style={{
-                backgroundColor: brandPrimary + '10',
-                borderColor: brandPrimary + '30',
-                color: brandPrimary,
-              }}
+              className="w-full text-xs py-1.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1 border border-slate-600 dark:border-slate-500 bg-slate-700/50 dark:bg-slate-700/60 text-slate-200 dark:text-slate-200 hover:bg-slate-600/60 dark:hover:bg-slate-600/60"
             >
               {post.status === 'Requested Changes' ? (
                 <>
@@ -379,14 +374,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
           )}
 
           {post.status === 'Posted' && (
-            <div
-              className="w-full text-xs py-1.5 rounded-lg font-medium text-center border"
-              style={{
-                backgroundColor: brandSecondary + '20',
-                borderColor: brandSecondary + '40',
-                color: brandPrimary,
-              }}
-            >
+            <div className="w-full text-xs py-1.5 rounded-lg font-medium text-center border border-slate-600 dark:border-slate-500 text-slate-300 dark:text-slate-300">
               Posted
             </div>
           )}

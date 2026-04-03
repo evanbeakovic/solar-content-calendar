@@ -677,7 +677,7 @@ export default function UsersPageClient({ initialProfiles, clients: initialClien
                       <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#10375C] bg-opacity-10 dark:bg-[#10375C]/40 flex items-center justify-center text-[#10375C] dark:text-[#8EE3E3] font-bold text-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-600 dark:bg-slate-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                               {logoUrl ? (
                                 <img src={logoUrl} alt={client.name} className="w-full h-full object-cover" />
                               ) : (

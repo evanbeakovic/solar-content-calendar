@@ -114,7 +114,7 @@ function ClientDropdown({ clients, selected, onChange }: {
                   className="w-4 h-4 rounded accent-[#10375C]"
                 />
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-[#10375C]/10 dark:bg-[#10375C]/40 flex items-center justify-center text-[#10375C] dark:text-[#8EE3E3] text-xs font-bold">
+                  <div className="w-5 h-5 rounded-md bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
                     {c.name[0]}
                   </div>
                   <span className="text-sm text-gray-700 dark:text-gray-200">{c.name}</span>
@@ -339,12 +339,12 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowCSVImport(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#10375C] text-[#10375C] font-semibold hover:bg-[#10375C] hover:text-white transition-all text-sm"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-600 bg-slate-700 text-slate-200 font-semibold hover:bg-slate-600 hover:text-white transition-all text-sm"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
             </svg>
-            Import CSV
+            Import
           </button>
           <button
             onClick={() => setShowNewPost(true)}
@@ -353,7 +353,7 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            New Post
+            New
           </button>
         </div>
       </div>
