@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Client, Post, PostImage, PostStatus } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
 import { validateUpload, POST_FORMATS } from '@/lib/postFormats'
 
 interface EditPostModalProps {
@@ -24,7 +23,6 @@ function getPlatformLabel(platforms: string[], format: string): string {
 }
 
 export default function EditPostModal({ post, clients, onClose, onUpdated, onDeleted, onDuplicated }: EditPostModalProps) {
-  const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const youtubeThumbnailInputRef = useRef<HTMLInputElement>(null)
   const pendingFilesRef = useRef<File[] | null>(null)
@@ -102,8 +100,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
 
   const getImageUrl = (path: string | null) => {
     if (!path) return null
-    const { data } = supabase.storage.from('post-images').getPublicUrl(path)
-    return data.publicUrl
+    return path
   }
 
   function requestClose() {
@@ -223,15 +220,18 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
       return
     }
     setUploadingYoutubeThumbnail(true)
-    const ext = file.name.split('.').pop() || 'jpg'
-    const path = `${post.client_id}/${post.id}/youtube_thumbnail.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('post-images')
-      .upload(path, file, { upsert: true })
-    if (uploadError) {
-      setError(`Failed to upload thumbnail: ${uploadError.message}`)
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch(`/api/posts/${post.id}/youtube-thumbnail`, {
+      method: 'POST',
+      body: formData,
+    })
+    if (!res.ok) {
+      const data = await res.json()
+      setError(`Failed to upload thumbnail: ${data.error || 'Upload failed'}`)
     } else {
-      setYoutubeThumbnailPath(path)
+      const data = await res.json()
+      setYoutubeThumbnailPath(data.url)
     }
     setUploadingYoutubeThumbnail(false)
   }
@@ -656,10 +656,10 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                   {youtubeThumbnailPath ? (
                     <div className="relative group">
                       <img
-                        src={`https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${youtubeThumbnailPath}`}
+                        src={youtubeThumbnailPath}
                         alt="YouTube thumbnail"
                         className="w-full h-auto object-contain max-h-48 cursor-pointer"
-                        onClick={() => setLightboxUrl(`https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${youtubeThumbnailPath}`)}
+                        onClick={() => setLightboxUrl(youtubeThumbnailPath)}
                       />
                       <button
                         type="button"

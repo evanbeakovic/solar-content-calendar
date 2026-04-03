@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { uploadToR2 } from '@/lib/r2'
 
 export async function POST(
   request: NextRequest,
@@ -51,24 +52,22 @@ export async function POST(
 
   for (const img of sortedImages) {
     try {
-      const { data: fileData, error: downloadError } = await adminSupabase.storage
-        .from('post-images')
-        .download(img.path)
+      // img.path is now the full R2 public URL — fetch it directly
+      const fetchResponse = await fetch(img.path)
+      if (!fetchResponse.ok) continue
 
-      if (downloadError || !fileData) continue
+      const fileBlob = await fetchResponse.blob()
+      const urlPath = img.path.split('?')[0]
+      const ext = urlPath.split('.').pop() || 'jpg'
+      const newKey = `${newPost.client_id}/${newPost.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-      const ext = img.path.split('.').pop() || 'jpg'
-      const newPath = `${newPost.client_id}/${newPost.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-      const { error: uploadError } = await adminSupabase.storage
-        .from('post-images')
-        .upload(newPath, fileData)
-
-      if (uploadError) continue
+      const arrayBuffer = await fileBlob.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      const newUrl = await uploadToR2(buffer, newKey, fileBlob.type || 'image/jpeg')
 
       const { data: newImgRow, error: imgInsertError } = await adminSupabase
         .from('post_images')
-        .insert({ post_id: newPost.id, path: newPath, position: img.position })
+        .insert({ post_id: newPost.id, path: newUrl, position: img.position })
         .select()
         .single()
 

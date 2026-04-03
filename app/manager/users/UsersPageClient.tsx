@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react'
 import { Profile, Client, Role } from '@/lib/types'
 import { format } from 'date-fns'
-import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import CreateUserModal from '../components/CreateUserModal'
 
 interface UsersPageClientProps {
@@ -20,10 +19,7 @@ const ROLE_STYLES: Record<string, string> = {
 type Tab = 'users' | 'clients'
 
 function getLogoUrl(logoPath: string | null | undefined): string | null {
-  if (!logoPath) return null
-  const supabase = createSupabaseClient()
-  const { data } = supabase.storage.from('post-images').getPublicUrl(logoPath)
-  return data.publicUrl
+  return logoPath || null
 }
 
 // ── Edit User Modal ──────────────────────────────────────────────

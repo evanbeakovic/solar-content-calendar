@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Post, Client, PostStatus } from '@/lib/types'
-import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import {
   startOfWeek, endOfWeek, addWeeks,
   startOfMonth, endOfMonth, isWithinInterval, parseISO,
@@ -70,10 +69,7 @@ function getPeriodRange(
 }
 
 function getLogoUrl(logoPath: string | null | undefined): string | null {
-  if (!logoPath) return null
-  const supabase = createSupabaseClient()
-  const { data } = supabase.storage.from('post-images').getPublicUrl(logoPath)
-  return data.publicUrl
+  return logoPath || null
 }
 
 // ── Multi-select client dropdown (for Manage Posts filters) ──────
@@ -239,7 +235,6 @@ function ClientPreviewDropdown({ clients, selected, onChange }: {
 
 // ── Main Component ───────────────────────────────────────────────
 export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsTabProps) {
-  const supabase = createSupabaseClient()
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [view, setView] = useState<View>('manage')
 
@@ -394,9 +389,8 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
       if (!images && !post.image_path) continue
       if (images && images.length > 1) {
         for (let i = 0; i < images.length; i++) {
-          const { data } = supabase.storage.from('post-images').getPublicUrl(images[i].path)
           const filename = `${post.client?.name || 'post'}-${i + 1}.jpg`.replace(/\s+/g, '-').toLowerCase()
-          const res = await fetch(`/api/download?url=${encodeURIComponent(data.publicUrl)}&filename=${encodeURIComponent(filename)}`)
+          const res = await fetch(`/api/download?url=${encodeURIComponent(images[i].path)}&filename=${encodeURIComponent(filename)}`)
           const blob = await res.blob()
           const a = document.createElement('a')
           a.href = URL.createObjectURL(blob)

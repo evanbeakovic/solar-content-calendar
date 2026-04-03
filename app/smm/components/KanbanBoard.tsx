@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Post, Client, PostStatus } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
 import { format, startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns'
 import PostCard from './PostCard'
 import NewPostModal from './NewPostModal'
@@ -131,7 +130,6 @@ function ClientDropdown({ clients, selected, onChange }: {
 
 // ── Main Component ───────────────────────────────────────────────
 export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps) {
-  const supabase = createClient()
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [activeStatus, setActiveStatus] = useState<PostStatus>('Uploads')
   const [selectedClients, setSelectedClients] = useState<string[]>(clients.map(c => c.id))
@@ -283,9 +281,8 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
       if (!images && !post.image_path) continue
       if (images && images.length > 1) {
         for (let i = 0; i < images.length; i++) {
-          const { data } = supabase.storage.from('post-images').getPublicUrl(images[i].path)
           const filename = `${post.client?.name || 'post'}-${i + 1}.jpg`.replace(/\s+/g, '-').toLowerCase()
-          const res = await fetch(`/api/download?url=${encodeURIComponent(data.publicUrl)}&filename=${encodeURIComponent(filename)}`)
+          const res = await fetch(`/api/download?url=${encodeURIComponent(images[i].path)}&filename=${encodeURIComponent(filename)}`)
           const blob = await res.blob()
           const a = document.createElement('a')
           a.href = URL.createObjectURL(blob)
@@ -294,9 +291,8 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
           URL.revokeObjectURL(a.href)
         }
       } else if (post.image_path) {
-        const { data } = supabase.storage.from('post-images').getPublicUrl(post.image_path)
         const filename = `${post.client?.name || 'post'}-${post.scheduled_date || 'image'}.jpg`.replace(/\s+/g, '-').toLowerCase()
-        const res = await fetch(`/api/download?url=${encodeURIComponent(data.publicUrl)}&filename=${encodeURIComponent(filename)}`)
+        const res = await fetch(`/api/download?url=${encodeURIComponent(post.image_path)}&filename=${encodeURIComponent(filename)}`)
         const blob = await res.blob()
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)

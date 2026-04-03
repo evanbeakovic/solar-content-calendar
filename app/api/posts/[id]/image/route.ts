@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { uploadToR2, deleteFromR2 } from '@/lib/r2'
 
 export async function POST(
   request: Request,
@@ -46,29 +47,27 @@ export async function POST(
 
   for (const file of files) {
     const fileExt = file.name.split('.').pop()
-    const filePath = `${post.client_id}/${post.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+    const key = `${post.client_id}/${post.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
 
-    const { error: uploadError } = await adminClient.storage
-      .from('post-images')
-      .upload(filePath, file, { cacheControl: '3600', upsert: true })
-
-    if (uploadError) {
-      return NextResponse.json({ error: uploadError.message }, { status: 500 })
+    let publicUrl: string
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      publicUrl = await uploadToR2(buffer, key, file.type || 'application/octet-stream')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Upload failed'
+      return NextResponse.json({ error: message }, { status: 500 })
     }
 
     const { data: imageRow, error: insertError } = await adminClient
       .from('post_images')
-      .insert({ post_id: postId, path: filePath, position: nextPosition })
+      .insert({ post_id: postId, path: publicUrl, position: nextPosition })
       .select()
       .single()
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
-
-    const { data: { publicUrl } } = adminClient.storage
-      .from('post-images')
-      .getPublicUrl(filePath)
 
     uploadedImages.push({ ...imageRow, publicUrl })
     nextPosition++
@@ -115,8 +114,7 @@ export async function DELETE(
       .eq('post_id', postId)
 
     if (allImages && allImages.length > 0) {
-      const paths = allImages.map((img: { path: string }) => img.path)
-      await adminClient.storage.from('post-images').remove(paths)
+      await Promise.all(allImages.map((img: { path: string }) => deleteFromR2(img.path)))
       await adminClient.from('post_images').delete().eq('post_id', postId)
     }
 
@@ -136,7 +134,7 @@ export async function DELETE(
     .single()
 
   if (image) {
-    await adminClient.storage.from('post-images').remove([image.path])
+    await deleteFromR2(image.path)
     await adminClient.from('post_images').delete().eq('id', imageId)
   }
 

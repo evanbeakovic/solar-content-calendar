@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { uploadToR2, deleteFromR2 } from '@/lib/r2'
 
 export async function POST(
   request: Request,
@@ -32,7 +33,7 @@ export async function POST(
   }
 
   const fileExt = file.name.split('.').pop()
-  const filePath = `client-logos/${clientId}/${Date.now()}.${fileExt}`
+  const key = `client-logos/${clientId}/${Date.now()}.${fileExt}`
 
   // Remove previous logo if it exists
   const { data: existing } = await adminClient
@@ -42,27 +43,27 @@ export async function POST(
     .single()
 
   if (existing?.logo_path) {
-    await adminClient.storage.from('post-images').remove([existing.logo_path])
+    await deleteFromR2(existing.logo_path)
   }
 
-  const { error: uploadError } = await adminClient.storage
-    .from('post-images')
-    .upload(filePath, file, { cacheControl: '3600', upsert: true })
-
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
+  let publicUrl: string
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    publicUrl = await uploadToR2(buffer, key, file.type)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 
   const { error: updateError } = await adminClient
     .from('clients')
-    .update({ logo_path: filePath })
+    .update({ logo_path: publicUrl })
     .eq('id', clientId)
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
-  const { data: { publicUrl } } = adminClient.storage
-    .from('post-images')
-    .getPublicUrl(filePath)
-
-  return NextResponse.json({ logo_path: filePath, publicUrl })
+  return NextResponse.json({ logo_path: publicUrl, publicUrl })
 }
 
 export async function DELETE(
@@ -83,7 +84,7 @@ export async function DELETE(
     .single()
 
   if (client?.logo_path) {
-    await adminClient.storage.from('post-images').remove([client.logo_path])
+    await deleteFromR2(client.logo_path)
   }
 
   await adminClient

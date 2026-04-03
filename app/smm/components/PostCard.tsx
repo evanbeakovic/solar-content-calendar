@@ -5,7 +5,6 @@
 
 import { useState } from 'react'
 import { Post, PostStatus } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import { format } from 'date-fns'
 
@@ -25,7 +24,6 @@ const STATUS_ORDER: PostStatus[] = [
 ]
 
 export default function PostCard({ post, onClick, onStatusChange, onSelect, isSelected, isSelectionMode, onDuplicated, onDeleted }: PostCardProps) {
-  const supabase = createClient()
   const [showMenu, setShowMenu] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [duplicating, setDuplicating] = useState(false)
@@ -52,8 +50,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
   const nextStatus = getNextStatus()
 
   function getStorageUrl(path: string): string {
-    const { data } = supabase.storage.from('post-images').getPublicUrl(path)
-    return data.publicUrl
+    return path
   }
 
   async function handleAdvanceStatus(e: React.MouseEvent) {
@@ -74,8 +71,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
 
   const getImageUrl = () => {
     if (!post.image_path) return null
-    const { data } = supabase.storage.from('post-images').getPublicUrl(post.image_path)
-    return data.publicUrl
+    return post.image_path
   }
 
   const imageUrl = getImageUrl()
@@ -323,10 +319,8 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
 
               if (images && images.length > 1) {
                 for (let i = 0; i < images.length; i++) {
-                  const sb = (await import('@/lib/supabase/client')).createClient()
-                  const { data } = sb.storage.from('post-images').getPublicUrl(images[i].path)
                   const filename = `${post.client?.name || 'post'}-${i + 1}.jpg`.replace(/\s+/g, '-').toLowerCase()
-                  const res = await fetch(`/api/download?url=${encodeURIComponent(data.publicUrl)}&filename=${encodeURIComponent(filename)}`)
+                  const res = await fetch(`/api/download?url=${encodeURIComponent(images[i].path)}&filename=${encodeURIComponent(filename)}`)
                   const blob = await res.blob()
                   const a = document.createElement('a')
                   a.href = URL.createObjectURL(blob)
@@ -460,8 +454,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
                 {void console.log('[SMM PostCard modal] change_request_images:', post.change_request_images)}
                 <div className="flex gap-3 flex-wrap mb-2">
                   {post.change_request_images!.map((path, i) => {
-                    const cleanPath = path.startsWith('/') ? path.slice(1) : path
-                    const url = `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
+                    const url = path
                     const isChecked = selectedImageIndices.has(i)
                     return (
                       <div key={i} className="relative">
@@ -524,8 +517,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
                         e.stopPropagation()
                         const indices = Array.from(selectedImageIndices).sort((a, b) => a - b)
                         for (const i of indices) {
-                          const cleanPath = post.change_request_images![i].startsWith('/') ? post.change_request_images![i].slice(1) : post.change_request_images![i]
-                          const url = `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
+                          const url = post.change_request_images![i]
                           await downloadImage(url, `reference-${i + 1}.jpg`)
                         }
                       }}

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { uploadToR2 } from '@/lib/r2'
 
 export async function PATCH(
   request: Request,
@@ -14,7 +15,7 @@ export async function PATCH(
   const formData = await request.formData()
   const note = formData.get('note')
   const imageFiles = formData.getAll('images') as File[]
-  // Existing image paths the client wants to retain (used when editing a request)
+  // Existing image URLs the client wants to retain (used when editing a request)
   const keepPaths = (formData.getAll('keepPath') as string[]).filter(
     (p): p is string => typeof p === 'string' && p.length > 0
   )
@@ -25,18 +26,20 @@ export async function PATCH(
 
   const adminClient = createAdminClient()
 
-  // Upload each new image file server-side via admin storage client
-  const newImagePaths: string[] = []
+  // Upload each new image file server-side to R2
+  const newImageUrls: string[] = []
   for (const file of imageFiles) {
     if (!(file instanceof File) || file.size === 0) continue
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const path = `change-requests/${id}/${Date.now()}-${safeName}`
+    const key = `change-requests/${id}/${Date.now()}-${safeName}`
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const { error } = await adminClient.storage
-      .from('post-images')
-      .upload(path, buffer, { contentType: file.type, upsert: true })
-    if (!error) newImagePaths.push(path)
+    try {
+      const url = await uploadToR2(buffer, key, file.type || 'image/jpeg')
+      newImageUrls.push(url)
+    } catch {
+      // Skip files that fail to upload
+    }
   }
 
   const { data, error } = await adminClient
@@ -44,7 +47,7 @@ export async function PATCH(
     .update({
       status: 'Requested Changes',
       change_request_note: note.trim(),
-      change_request_images: [...keepPaths, ...newImagePaths],
+      change_request_images: [...keepPaths, ...newImageUrls],
       change_request_fixed: false,
     })
     .eq('id', id)
