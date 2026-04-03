@@ -8,6 +8,10 @@ const nextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pub-41587758c865498eae690b029e8a7f21.r2.dev',
+      },
     ],
   },
 }

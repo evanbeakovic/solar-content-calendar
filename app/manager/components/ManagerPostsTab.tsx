@@ -399,9 +399,9 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
           URL.revokeObjectURL(a.href)
         }
       } else if (post.image_path) {
-        const { data } = supabase.storage.from('post-images').getPublicUrl(post.image_path)
+        const imageUrl = post.image_path
         const filename = `${post.client?.name || 'post'}-${post.scheduled_date || 'image'}.jpg`.replace(/\s+/g, '-').toLowerCase()
-        const res = await fetch(`/api/download?url=${encodeURIComponent(data.publicUrl)}&filename=${encodeURIComponent(filename)}`)
+        const res = await fetch(`/api/download?url=${encodeURIComponent(imageUrl)}&filename=${encodeURIComponent(filename)}`)
         const blob = await res.blob()
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
