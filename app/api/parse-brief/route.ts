@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAnthropicKey } from "@/lib/getAnthropicKey";
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    // TODO: account_id should come from the authenticated session in a multi-tenant future
+    const accountId = (formData.get("account_id") as string) || "default";
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -23,11 +26,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File is empty" }, { status: 400 });
     }
 
+    let anthropicApiKey: string;
+    try {
+      anthropicApiKey = await getAnthropicKey(accountId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY || "",
+        "x-api-key": anthropicApiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({

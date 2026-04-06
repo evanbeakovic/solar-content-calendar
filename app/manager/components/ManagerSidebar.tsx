@@ -5,6 +5,7 @@ import { Profile } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { POST_FORMATS, CUSTOM_FORMATS, FormatRule, AspectRatio } from '@/lib/postFormats'
+import ApiKeySettings from './ApiKeySettings'
 
 type ThemeMode = 'system' | 'light' | 'dark'
 type Section = 'dashboard' | 'content' | 'users' | 'preview'
@@ -123,6 +124,7 @@ export default function ManagerSidebar({
   const [showSettings, setShowSettings] = useState(false)
   const [showThemeMenu, setShowThemeMenu] = useState(false)
   const [showFormats, setShowFormats] = useState(false)
+  const [showApiKeys, setShowApiKeys] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [customFormats, setCustomFormats] = useState<FormatRule[]>([...CUSTOM_FORMATS])
   const [newFormat, setNewFormat] = useState({ ...emptyNewFormat })
@@ -711,6 +713,26 @@ export default function ManagerSidebar({
                   )}
                 </div>
               )}
+            </div>
+
+            {/* API Keys */}
+            <div>
+              <button
+                onClick={() => setShowApiKeys(v => !v)}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                  </svg>
+                  <span>API Keys</span>
+                </div>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                  className={`transition-transform ${showApiKeys ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showApiKeys && <ApiKeySettings />}
             </div>
           </div>
         )}
