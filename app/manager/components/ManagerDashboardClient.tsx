@@ -7,6 +7,7 @@ import ClientTable from './ClientTable'
 import ManagerPostsTab from './ManagerPostsTab'
 import UsersPageClient from '../users/UsersPageClient'
 import ContentView from '@/app/client/components/ContentView'
+import PlansTab from './PlansTab'
 
 interface ClientWithStats extends Client {
   postCounts: Record<string, number>
@@ -24,7 +25,7 @@ interface ManagerDashboardClientProps {
   initialProfiles: (Profile & { clients?: Client[] })[]
 }
 
-type Section = 'dashboard' | 'content' | 'users' | 'preview'
+type Section = 'dashboard' | 'content' | 'plans' | 'users' | 'preview'
 
 export default function ManagerDashboardClient({
   initialPosts,
@@ -60,6 +61,8 @@ export default function ManagerDashboardClient({
       {activeSection === 'content' && (
         <ManagerPostsTab initialPosts={initialPosts} clients={clients} />
       )}
+
+      {activeSection === 'plans' && <PlansTab />}
 
       {activeSection === 'users' && (
         <UsersPageClient
