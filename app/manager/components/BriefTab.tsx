@@ -234,7 +234,12 @@ export default function BriefTab({ clientId, clientName }: BriefTabProps) {
               {uploading ? 'Parsing…' : uploadSuccess ? '✓ Imported' : '↑ Import Brief'}
             </button>
           </div>
-          {apiKeyModalOpen && <ApiKeyRequiredModal onClose={() => setApiKeyModalOpen(false)} />}
+          {apiKeyModalOpen && (
+            <ApiKeyRequiredModal
+              onClose={() => setApiKeyModalOpen(false)}
+              onSuccess={() => fileInputRef.current?.click()}
+            />
+          )}
           <button
             onClick={handleSave}
             disabled={saving}
