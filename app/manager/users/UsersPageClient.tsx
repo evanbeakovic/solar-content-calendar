@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Profile, Client, Role } from '@/lib/types'
 import { format } from 'date-fns'
 import CreateUserModal from '../components/CreateUserModal'
+import BriefTab from '../components/BriefTab'
 
 interface UsersPageClientProps {
   initialProfiles: (Profile & { client?: Client; clients?: Client[] })[]
@@ -163,6 +164,33 @@ function EditUserModal({
 }
 
 // ── Edit Client Modal ────────────────────────────────────────────
+
+// ── Brief Modal ──────────────────────────────────────────────────
+function BriefModal({
+  client,
+  onClose,
+}: {
+  client: Client
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Client Brief</span>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+        <BriefTab clientId={client.id} clientName={client.name} />
+      </div>
+    </div>
+  )
+}
+
 function EditClientModal({
   client,
   onClose,
@@ -180,6 +208,7 @@ function EditClientModal({
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [briefOpen, setBriefOpen] = useState(false)
 
   async function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -299,12 +328,24 @@ function EditClientModal({
           </div>
         </div>
         {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
-        <div className="flex gap-3 mt-6">
+
+        {/* Brief button */}
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <button
+            onClick={() => setBriefOpen(true)}
+            className="w-full px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+          >
+            📋 Set Up Client Brief
+          </button>
+        </div>
+
+        <div className="flex gap-3 mt-4">
           <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Cancel</button>
           <button onClick={handleSave} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-[#10375C] text-white text-sm font-semibold hover:bg-[#0d2d4a] transition-colors disabled:opacity-50">
             {loading ? 'Saving…' : 'Save'}
           </button>
         </div>
+        {briefOpen && <BriefModal client={client} onClose={() => setBriefOpen(false)} />}
       </div>
     </div>
   )
@@ -326,6 +367,7 @@ function CreateClientModal({
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [briefPromptClient, setBriefPromptClient] = useState<Client | null>(null)
 
   function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -369,6 +411,7 @@ function CreateClientModal({
     }
 
     setLoading(false)
+    setBriefPromptClient(newClient)
     onCreated()
   }
 
@@ -376,6 +419,9 @@ function CreateClientModal({
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 border border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">New Client</h2>
+        {briefPromptClient && (
+          <BriefModal client={briefPromptClient} onClose={() => { setBriefPromptClient(null); onClose() }} />
+        )}
         <div className="space-y-4">
           {/* Logo upload */}
           <div>
