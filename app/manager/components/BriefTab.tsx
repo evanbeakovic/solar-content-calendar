@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useApiKeyCheck } from '@/lib/hooks/useApiKeyCheck'
+import ApiKeyRequiredModal from './ApiKeyRequiredModal'
 
 interface BriefTabProps {
   clientId: string
@@ -56,7 +58,9 @@ export default function BriefTab({ clientId, clientName }: BriefTabProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { hasKey } = useApiKeyCheck()
 
   const isOtherLanguage = !PRESET_LANGUAGES.includes(brief.language) || brief.language === 'Other'
 
@@ -217,13 +221,20 @@ export default function BriefTab({ clientId, clientName }: BriefTabProps) {
           <div>
             <input ref={fileInputRef} type="file" accept=".md,.txt" onChange={handleFileUpload} className="hidden" />
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                if (hasKey === false) {
+                  setApiKeyModalOpen(true)
+                } else {
+                  fileInputRef.current?.click()
+                }
+              }}
               disabled={uploading}
               className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 border border-gray-200 dark:border-gray-700"
             >
               {uploading ? 'Parsing…' : uploadSuccess ? '✓ Imported' : '↑ Import Brief'}
             </button>
           </div>
+          {apiKeyModalOpen && <ApiKeyRequiredModal onClose={() => setApiKeyModalOpen(false)} />}
           <button
             onClick={handleSave}
             disabled={saving}
