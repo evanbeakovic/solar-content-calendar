@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // GET /api/content-plan-previews?client_id=xxx&status=pending
 export async function GET(req: NextRequest) {
