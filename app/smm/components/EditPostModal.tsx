@@ -14,8 +14,65 @@ interface EditPostModalProps {
 }
 
 const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'Twitter', 'TikTok', 'YouTube']
-const FORMATS = ['Post', 'Carousel', 'Story', 'Reel', 'Video', 'Thumbnail', 'Short']
+const FORMATS = ['Post', 'Carousel', 'Story', 'Reel', 'Video']
 const STATUSES: PostStatus[] = ['Uploads', 'Being Created', 'To Be Confirmed', 'Requested Changes', 'Confirmed', 'Scheduled', 'Posted']
+
+const PLATFORM_BRAND: Record<string, string> = {
+  Instagram: 'linear-gradient(to top right, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+  Facebook: '#1877F2',
+  LinkedIn: '#0A66C2',
+  Twitter: '#14171A',
+  TikTok: '#010101',
+  YouTube: '#FF0000',
+}
+
+function PlatformIcon({ platform }: { platform: string }) {
+  switch (platform) {
+    case 'Instagram':
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="5"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      )
+    case 'Facebook':
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+        </svg>
+      )
+    case 'LinkedIn':
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+          <circle cx="4" cy="4" r="2"/>
+        </svg>
+      )
+    case 'Twitter':
+      return (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.264 5.636 5.9-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      )
+    case 'TikTok':
+      return (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.3 6.3 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.86 4.86 0 01-1.01-.04z"/>
+        </svg>
+      )
+    case 'YouTube':
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="3"/>
+          <polygon points="10 8 16 12 10 16" fill="currentColor" stroke="none"/>
+        </svg>
+      )
+    default:
+      return null
+  }
+}
+
 
 function getPlatformLabel(platforms: string[], format: string): string {
   if (platforms.length === 0) return ''
@@ -45,12 +102,13 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
   const [dragActive, setDragActive] = useState(false)
   const [ytDragActive, setYtDragActive] = useState(false)
   const [showFormatDropdown, setShowFormatDropdown] = useState(false)
+  const [showThumbnail, setShowThumbnail] = useState(false)
 
   const [localImages, setLocalImages] = useState<PostImage[]>(
     (post.images || []).sort((a, b) => a.position - b.position)
   )
 
-  const initialPlatforms = post.platform ? post.platform.split(' + ') : ['Instagram', 'Facebook']
+  const initialPlatforms = post.platform ? post.platform.split(' + ') : []
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(initialPlatforms)
 
   const initialFormValues = {
@@ -90,6 +148,21 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
 
   function handleChange(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  function autoExpand(el: HTMLTextAreaElement) {
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+
+  function platformsForFormat(format: string): Set<string> {
+    const result = new Set<string>()
+    for (const rule of POST_FORMATS) {
+      if (rule.format === format) {
+        rule.platforms.forEach(p => result.add(p))
+      }
+    }
+    return result
   }
 
   function togglePlatform(p: string) {
@@ -243,16 +316,8 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
     if (youtubeThumbnailInputRef.current) youtubeThumbnailInputRef.current.value = ''
   }
 
-  // Bug G: filter formats to only those compatible with selected platforms
   function getAvailableFormats(): string[] {
-    if (selectedPlatforms.length === 0) return FORMATS
-    const available = new Set<string>()
-    for (const rule of POST_FORMATS) {
-      if (rule.platforms.some(p => selectedPlatforms.includes(p))) {
-        available.add(rule.format)
-      }
-    }
-    return FORMATS.filter(f => available.has(f))
+    return FORMATS
   }
 
   async function handleRemoveImage(imageId: string) {
@@ -464,6 +529,8 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                           disabled={f === 'Post' && localImages.length > 1}
                           onClick={() => {
                             if (f === 'Post' && localImages.length > 1) return
+                            const supported = platformsForFormat(f)
+                            setSelectedPlatforms(prev => prev.filter(p => supported.has(p)))
                             handleChange('format', f)
                             setShowFormatDropdown(false)
                           }}
@@ -634,140 +701,175 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               )}
             </div>
 
-            {/* YouTube Thumbnail — Bug F drag-and-drop added */}
-            {selectedPlatforms.includes('YouTube') && (form.format === 'Video' || form.format === 'Thumbnail') && (
+            {/* Thumbnail toggle — shown for video formats */}
+            {isVideo && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">YouTube Thumbnail</label>
-                <div
-                  onDragOver={e => { e.preventDefault(); setYtDragActive(true) }}
-                  onDragEnter={e => { e.preventDefault(); setYtDragActive(true) }}
-                  onDragLeave={e => { e.preventDefault(); setYtDragActive(false) }}
-                  onDrop={async e => {
-                    e.preventDefault()
-                    setYtDragActive(false)
-                    const files = Array.from(e.dataTransfer.files)
-                    const file = files.find(f => f.type.startsWith('image/'))
-                    if (file) await processYoutubeThumbnailFile(file)
-                  }}
-                  className={`rounded-xl border-2 border-dashed transition-colors overflow-hidden ${
-                    ytDragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200 dark:border-gray-600'
-                  }`}
-                >
-                  {youtubeThumbnailPath ? (
-                    <div className="relative group">
-                      <img
-                        src={youtubeThumbnailPath}
-                        alt="YouTube thumbnail"
-                        className="w-full h-auto object-contain max-h-48 cursor-pointer"
-                        onClick={() => setLightboxUrl(youtubeThumbnailPath)}
-                      />
-                      <button
-                        type="button"
-                        onClick={e => { e.stopPropagation(); setYoutubeThumbnailPath(null) }}
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                      >
-                        ×
-                      </button>
-                      <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={e => { e.stopPropagation(); youtubeThumbnailInputRef.current?.click() }}
-                          className="bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-lg"
-                        >
-                          Replace
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Add Thumbnail</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowThumbnail(v => !v)}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                      showThumbnail ? 'bg-[#10375C]' : 'bg-gray-200 dark:bg-gray-600'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                        showThumbnail ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {showThumbnail && (
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Thumbnail</label>
                     <div
-                      onClick={() => youtubeThumbnailInputRef.current?.click()}
-                      className="h-32 flex flex-col items-center justify-center gap-2 cursor-pointer text-gray-400 hover:text-[#10375C] transition-colors"
+                      onDragOver={e => { e.preventDefault(); setYtDragActive(true) }}
+                      onDragEnter={e => { e.preventDefault(); setYtDragActive(true) }}
+                      onDragLeave={e => { e.preventDefault(); setYtDragActive(false) }}
+                      onDrop={async e => {
+                        e.preventDefault()
+                        setYtDragActive(false)
+                        const files = Array.from(e.dataTransfer.files)
+                        const file = files.find(f => f.type.startsWith('image/'))
+                        if (file) await processYoutubeThumbnailFile(file)
+                      }}
+                      className={`rounded-xl border-2 border-dashed transition-colors overflow-hidden ${
+                        ytDragActive ? 'border-[#10375C] bg-[#10375C]/5' : 'border-gray-200 dark:border-gray-600'
+                      }`}
                     >
-                      {uploadingYoutubeThumbnail ? (
-                        <>
-                          <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                          </svg>
-                          <span className="text-sm">Uploading...</span>
-                        </>
+                      {youtubeThumbnailPath ? (
+                        <div className="relative group">
+                          <img
+                            src={youtubeThumbnailPath}
+                            alt="Thumbnail"
+                            className="w-full h-auto object-contain max-h-48 cursor-pointer"
+                            onClick={() => setLightboxUrl(youtubeThumbnailPath)}
+                          />
+                          <button
+                            type="button"
+                            onClick={e => { e.stopPropagation(); setYoutubeThumbnailPath(null) }}
+                            className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          >
+                            ×
+                          </button>
+                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={e => { e.stopPropagation(); youtubeThumbnailInputRef.current?.click() }}
+                              className="bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-lg"
+                            >
+                              Replace
+                            </button>
+                          </div>
+                        </div>
                       ) : (
-                        <>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                          </svg>
-                          <span className="text-sm">Add</span>
-                        </>
+                        <div
+                          onClick={() => youtubeThumbnailInputRef.current?.click()}
+                          className="h-32 flex flex-col items-center justify-center gap-2 cursor-pointer text-gray-400 hover:text-[#10375C] transition-colors"
+                        >
+                          {uploadingYoutubeThumbnail ? (
+                            <>
+                              <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                              </svg>
+                              <span className="text-sm">Uploading...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                              </svg>
+                              <span className="text-sm">Add</span>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-                <input
-                  ref={youtubeThumbnailInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleYoutubeThumbnailUpload}
-                  className="hidden"
-                />
+                    <input
+                      ref={youtubeThumbnailInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleYoutubeThumbnailUpload}
+                      className="hidden"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
-              <select value={form.status} onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
-                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
+            {/* Client / Status / Scheduled Date — single row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Client</label>
+                <select value={form.client_id} onChange={(e) => handleChange('client_id', e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
+                  {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
+                </select>
+              </div>
 
-            {/* Client */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Client</label>
-              <select value={form.client_id} onChange={(e) => handleChange('client_id', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
-                {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
-              </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+                <select value={form.status} onChange={(e) => handleChange('status', e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
+                  {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Scheduled Date</label>
+                <input type="date" value={form.scheduled_date} onChange={(e) => handleChange('scheduled_date', e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
+              </div>
             </div>
 
             {/* Platforms */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platform</label>
               <div className="flex flex-wrap gap-2">
-                {PLATFORMS.map(p => (
-                  <label key={p} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={selectedPlatforms.includes(p)}
-                      onChange={() => togglePlatform(p)}
-                      className="w-4 h-4 rounded accent-[#10375C]"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{p}</span>
-                  </label>
-                ))}
+                {PLATFORMS.map(p => {
+                  const selected = selectedPlatforms.includes(p)
+                  const allowedPlatforms = form.format ? platformsForFormat(form.format) : null
+                  const isDisabled = allowedPlatforms !== null && !allowedPlatforms.has(p)
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      title={p}
+                      disabled={isDisabled}
+                      onClick={() => togglePlatform(p)}
+                      style={selected ? { background: PLATFORM_BRAND[p] } : undefined}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-2 ${
+                        isDisabled
+                          ? 'border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 opacity-40 cursor-not-allowed'
+                          : selected
+                            ? 'border-transparent text-white'
+                            : 'border-gray-400 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-gray-600 dark:hover:border-gray-300 hover:text-gray-600 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      <PlatformIcon platform={p} />
+                    </button>
+                  )
+                })}
               </div>
-            </div>
-
-            {/* Scheduled Date (Bug D: format select removed — now handled by subheading dropdown above) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Scheduled Date</label>
-              <input type="date" value={form.scheduled_date} onChange={(e) => handleChange('scheduled_date', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Content Pillar */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Content Pillar</label>
-              <input type="text" value={form.content_pillar} onChange={(e) => handleChange('content_pillar', e.target.value)}
-                placeholder="e.g. Education, Promotion"
+              <textarea value={form.content_pillar} onChange={(e) => handleChange('content_pillar', e.target.value)}
+                placeholder="e.g. Education, Promotion" rows={1}
+                style={{ resize: 'none' }}
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* Headline */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Headline</label>
-              <input type="text" value={form.headline} onChange={(e) => handleChange('headline', e.target.value)}
-                placeholder="Post headline..."
+              <textarea value={form.headline} onChange={(e) => handleChange('headline', e.target.value)}
+                placeholder="Post headline..." rows={1}
+                style={{ resize: 'none' }}
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
@@ -776,14 +878,16 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Body Text</label>
               <textarea value={form.body_text} onChange={(e) => handleChange('body_text', e.target.value)}
                 placeholder="Main body content..." rows={3}
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 resize-none" />
+                style={{ resize: 'none' }}
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
             {/* CTA */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Call to Action</label>
-              <input type="text" value={form.cta} onChange={(e) => handleChange('cta', e.target.value)}
-                placeholder="e.g. Shop Now, Learn More, Book Today"
+              <textarea value={form.cta} onChange={(e) => handleChange('cta', e.target.value)}
+                placeholder="e.g. Shop Now, Learn More, Book Today" rows={1}
+                style={{ resize: 'none' }}
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
@@ -792,49 +896,48 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Caption</label>
               <textarea value={form.caption} onChange={(e) => handleChange('caption', e.target.value)}
                 placeholder="Social media caption..." rows={3}
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 resize-none" />
-            </div>
-
-            {/* Hashtags */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Hashtags</label>
-              <input type="text" value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)}
-                placeholder="#brand #marketing"
+                style={{ resize: 'none' }}
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
 
-            {/* Row: Background Color + Visual Direction */}
+            {/* Hashtags + Background — two-column grid */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Background Color</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Hashtags</label>
+                <textarea value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)}
+                  onInput={(e) => autoExpand(e.currentTarget)}
+                  placeholder="#brand #marketing" rows={1}
+                  style={{ maxHeight: '48px', overflowY: 'auto', resize: 'none' }}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 overflow-y-auto" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Background</label>
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer flex-shrink-0 relative overflow-hidden"
+                    className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 flex-shrink-0"
                     style={{ backgroundColor: form.background_color }}
-                  >
-                    <input
-                      type="color"
-                      value={form.background_color}
-                      onChange={(e) => handleChange('background_color', e.target.value)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                  </div>
+                  />
                   <input
                     type="text"
                     value={form.background_color}
-                    onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="flex-1 px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 font-mono text-sm"
+                    onChange={(e) => {
+                      const v = e.target.value
+                      if (/^#[0-9a-fA-F]{0,6}$/.test(v)) handleChange('background_color', v)
+                    }}
+                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 font-mono"
                     placeholder="#ffffff"
                   />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Type a hex code or click the swatch to pick</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Visual Direction</label>
-                <input type="text" value={form.visual_direction} onChange={(e) => handleChange('visual_direction', e.target.value)}
-                  placeholder="Visual style notes..."
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
-              </div>
+            </div>
+
+            {/* Visual Direction — full-width */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Visual Direction</label>
+              <textarea value={form.visual_direction} onChange={(e) => handleChange('visual_direction', e.target.value)}
+                placeholder="Visual style notes..." rows={3}
+                style={{ resize: 'none' }}
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
             </div>
           </form>
         </div>

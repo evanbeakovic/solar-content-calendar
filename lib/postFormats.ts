@@ -21,15 +21,12 @@ export const POST_FORMATS: FormatRule[] = [
   { format: 'Post',      platforms: ['Instagram'], aspectRatios: ['1:1', '4:5'], minWidth: 1080, minHeight: 1080, isVideo: false },
   { format: 'Carousel',  platforms: ['Instagram'], aspectRatios: ['1:1', '4:5'], minWidth: 1080, minHeight: 1080, isVideo: false },
   { format: 'Story',     platforms: ['Instagram'], aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: false },
-  { format: 'Reel',      platforms: ['Instagram'], aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: true  },
   // Facebook
   { format: 'Post',      platforms: ['Facebook'],  aspectRatios: ['1:1', '4:5'], minWidth: 1080, minHeight: 1080, isVideo: false },
   { format: 'Carousel',  platforms: ['Facebook'],  aspectRatios: ['1:1', '4:5'], minWidth: 1080, minHeight: 1080, isVideo: false },
   { format: 'Story',     platforms: ['Facebook'],  aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: false },
-  { format: 'Reel',      platforms: ['Facebook'],  aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: true  },
   // TikTok
   { format: 'Post',      platforms: ['TikTok'],    aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: false },
-  { format: 'Video',     platforms: ['TikTok'],    aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: true  },
   // LinkedIn — no aspect ratio restriction, minimum 1080px wide
   { format: 'Post',      platforms: ['LinkedIn'],  aspectRatios: ['any'],         minWidth: 1080, minHeight: 0,    isVideo: false },
   { format: 'Carousel',  platforms: ['LinkedIn'],  aspectRatios: ['any'],         minWidth: 1080, minHeight: 0,    isVideo: false },
@@ -39,9 +36,9 @@ export const POST_FORMATS: FormatRule[] = [
   { format: 'Post',      platforms: ['Twitter'],   aspectRatios: ['16:9', '1:1'], minWidth: 1600, minHeight: 900,  isVideo: false },
   { format: 'Video',     platforms: ['Twitter'],   aspectRatios: ['16:9'],        minWidth: 1920, minHeight: 1080, isVideo: true  },
   // YouTube
-  { format: 'Thumbnail', platforms: ['YouTube'],   aspectRatios: ['16:9'],        minWidth: 1280, minHeight: 720,  isVideo: false },
   { format: 'Video',     platforms: ['YouTube'],   aspectRatios: ['16:9'],        minWidth: 1920, minHeight: 1080, isVideo: true  },
-  { format: 'Short',     platforms: ['YouTube'],   aspectRatios: ['9:16'],        minWidth: 1080, minHeight: 1920, isVideo: true  },
+  // Reel — Instagram, Facebook, TikTok, YouTube
+  { format: 'Reel',      platforms: ['Instagram', 'Facebook', 'TikTok', 'YouTube'], aspectRatios: ['9:16'], minWidth: 1080, minHeight: 1920, isVideo: true },
 ]
 
 export const CUSTOM_FORMATS: FormatRule[] = []

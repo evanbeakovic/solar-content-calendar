@@ -17,6 +17,41 @@ interface ImportPost {
   visual_direction?: string
 }
 
+const VALID_PLATFORMS = new Set(['Instagram', 'Facebook', 'LinkedIn', 'Twitter', 'TikTok', 'YouTube'])
+
+function normalizePlatform(raw: string | undefined | null): string | null {
+  if (!raw) return null
+  const normalized = raw
+    .split(' + ')
+    .map(part => {
+      const words = part.trim().split(/\s+/)
+      // Walk from the end, dropping words that are not a valid platform name
+      for (let i = words.length; i >= 1; i--) {
+        const candidate = words.slice(0, i).join(' ')
+        if (VALID_PLATFORMS.has(candidate)) return candidate
+      }
+      // No valid platform found — return trimmed original
+      return part.trim()
+    })
+    .join(' + ')
+  return normalized || null
+}
+
+const FORMAT_MAP: Record<string, string> = {
+  'Single Image': 'Post',
+  'Image': 'Post',
+  'Video': 'Video',
+  'Reel': 'Reel',
+  'Carousel': 'Carousel',
+  'Story': 'Story',
+  'Short': 'Short',
+}
+
+function normalizeFormat(raw: string | undefined | null): string | null {
+  if (!raw) return null
+  return FORMAT_MAP[raw] ?? raw
+}
+
 function normalizePost(post: ImportPost) {
   return {
     client_id: post.client_id,
@@ -29,8 +64,8 @@ function normalizePost(post: ImportPost) {
       }
       return raw || null
     })(),
-    platform: post.platform || null,
-    format: post.format || null,
+    platform: normalizePlatform(post.platform),
+    format: normalizeFormat(post.format),
     content_pillar: post.content_pillar || null,
     headline: post.headline || null,
     body_text: post.body_text || null,
