@@ -104,6 +104,7 @@ function ClientFilterDropdown({ clients, selected, onChange }: {
   return (
     <div ref={ref} className="relative">
       <button
+        data-testid="manager-client-filter"
         onClick={() => setOpen(v => !v)}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500 transition-colors min-w-[160px]"
       >
@@ -427,6 +428,7 @@ export default function ManagerPostsTab({ initialPosts, clients }: ManagerPostsT
               return (
                 <button
                   key={status}
+                  data-testid={`manager-tab-${status.toLowerCase().replace(/ /g, '-')}`}
                   onClick={() => { setActiveStatus(status); setSelectedPostIds(new Set()) }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                     isActive

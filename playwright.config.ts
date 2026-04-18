@@ -40,5 +40,14 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    {
+      name: 'manager',
+      testMatch: /manager-portal\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/.auth/manager.json',
+      },
+      dependencies: ['setup'],
+    },
   ],
 })
