@@ -650,40 +650,15 @@ function PreviewTable({
     setApproving(true)
     setApproveError('')
     try {
-      // Create one post row per platform for each planned post
-      await Promise.all(
-        posts.flatMap(post =>
-          post.platforms.map(platform =>
-            fetch('/api/posts', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                client_id: clientId,
-                scheduled_date: post.date,
-                platform,
-                format: post.format,
-                content_pillar: post.content_pillar,
-                headline: post.headline,
-                body_text: post.body_text,
-                cta: post.cta,
-                caption: post.caption,
-                hashtags: Array.isArray(post.hashtags) ? post.hashtags.join(' ') : post.hashtags,
-                status: 'Uploads',
-              }),
-            })
-          )
-        )
-      )
-
-      // Mark preview as approved (with current edited posts state)
-      await fetch('/api/content-plan-previews', {
-        method: 'PATCH',
+      const res = await fetch('/api/plans/approve', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: previewId, status: 'approved', posts }),
+        body: JSON.stringify({ client_id: clientId, posts, preview_id: previewId }),
       })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Approval failed')
 
-      const totalCreated = posts.reduce((sum, p) => sum + p.platforms.length, 0)
-      setApproveSuccess(`${totalCreated} posts created and added to your content pipeline`)
+      setApproveSuccess(`${data.count} posts created and added to your content pipeline`)
       onApproved()
     } catch (err: any) {
       setApproveError(err.message)

@@ -31,7 +31,8 @@
       "Bash(npx playwright *)"
     ],
     "additionalDirectories": [
-      "/Users/evanbeakovic/Desktop/Solar Content Calender/app/api/clients/[id]"
+      "/Users/evanbeakovic/Desktop/Solar Content Calender/app/api/clients/[id]",
+      "/Users/evanbeakovic/Solar App/app/api/plans"
     ]
   }
 }
