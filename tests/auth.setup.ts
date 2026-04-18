@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 const AUTH_FILE = 'tests/.auth/user.json'
+const SMM_AUTH_FILE = 'tests/.auth/smm.json'
 
 setup('authenticate as client', async ({ page }) => {
   const email = process.env.TEST_CLIENT_EMAIL
@@ -30,4 +31,30 @@ setup('authenticate as client', async ({ page }) => {
     fs.mkdirSync(dir, { recursive: true })
   }
   await page.context().storageState({ path: AUTH_FILE })
+})
+
+setup('authenticate as SMM', async ({ page }) => {
+  const email = process.env.TEST_SMM_EMAIL
+  const password = process.env.TEST_SMM_PASSWORD
+
+  if (!email || !password) {
+    throw new Error(
+      'TEST_SMM_EMAIL and TEST_SMM_PASSWORD must be set in .env.test'
+    )
+  }
+
+  await page.goto('/login')
+
+  await page.getByTestId('email-input').fill(email)
+  await page.getByTestId('password-input').fill(password)
+  await page.getByTestId('login-submit').click()
+
+  await page.waitForURL('**/smm**', { timeout: 15000 })
+  await expect(page).toHaveURL(/\/smm/)
+
+  const dir = path.dirname(SMM_AUTH_FILE)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+  await page.context().storageState({ path: SMM_AUTH_FILE })
 })

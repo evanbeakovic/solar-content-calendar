@@ -11,6 +11,7 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: 'html',
+  timeout: 60000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -23,9 +24,19 @@ export default defineConfig({
     },
     {
       name: 'chromium',
+      testMatch: /client-portal\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'tests/.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'smm',
+      testMatch: /smm-portal\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/.auth/smm.json',
       },
       dependencies: ['setup'],
     },

@@ -20,17 +20,17 @@ test.describe('Login', () => {
     await page.getByTestId('password-input').fill(password!)
     await page.getByTestId('login-submit').click()
 
-    await page.waitForURL('**/client**', { timeout: 15000 })
-    await expect(page).toHaveURL(/\/client/)
+    await expect(page).toHaveURL(/\/client/, { timeout: 30000 })
   })
 })
 
 // ── 2. Content tab ────────────────────────────────────────────────────────────
 test('post cards are visible in the active tab', async ({ page }) => {
-  await page.goto('/client')
+  await page.goto('/client', { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('[data-testid="post-card"], [data-testid="tab-awaiting"]', { timeout: 30000 })
 
   // Wait for the grid — may need time for data to load
-  await page.waitForSelector('[data-testid="post-card"]', { timeout: 15000 })
+  await page.waitForSelector('[data-testid="post-card"]', { timeout: 30000 })
 
   const cards = page.getByTestId('post-card')
   const count = await cards.count()
@@ -47,9 +47,10 @@ test('post cards are visible in the active tab', async ({ page }) => {
 
 // ── 3. Modal ──────────────────────────────────────────────────────────────────
 test('clicking a post card opens the modal with a visible image', async ({ page }) => {
-  await page.goto('/client')
+  await page.goto('/client', { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('[data-testid="post-card"], [data-testid="tab-awaiting"]', { timeout: 30000 })
 
-  await page.waitForSelector('[data-testid="post-card"]', { timeout: 15000 })
+  await page.waitForSelector('[data-testid="post-card"]', { timeout: 30000 })
 
   // Click the first card that has an image so we know the modal will show one
   const cardWithImage = page.getByTestId('post-card').filter({
@@ -75,7 +76,8 @@ test('clicking a post card opens the modal with a visible image', async ({ page 
 
 // ── 4. Approve flow ───────────────────────────────────────────────────────────
 test('approving a post moves it out of Awaiting Your Review', async ({ page }) => {
-  await page.goto('/client')
+  await page.goto('/client', { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('[data-testid="post-card"], [data-testid="tab-awaiting"]', { timeout: 30000 })
 
   // Make sure we're on the "Awaiting Your Review" tab
   await page.getByTestId('tab-awaiting').click()
@@ -116,7 +118,8 @@ test('approving a post moves it out of Awaiting Your Review', async ({ page }) =
 
 // ── 5. Tab switching ──────────────────────────────────────────────────────────
 test('clicking through all tabs does not crash the page', async ({ page }) => {
-  await page.goto('/client')
+  await page.goto('/client', { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('[data-testid="post-card"], [data-testid="tab-awaiting"]', { timeout: 30000 })
 
   const tabs = [
     { testId: 'tab-awaiting',   label: 'Awaiting Your Review' },

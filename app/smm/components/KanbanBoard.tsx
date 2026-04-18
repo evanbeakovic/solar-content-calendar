@@ -426,6 +426,7 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
           return (
             <button
               key={status}
+              data-testid={`smm-tab-${status.toLowerCase().replace(/ /g, '-')}`}
               onClick={() => { setActiveStatus(status); setSelectedPostIds(new Set()) }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                 isActive

@@ -124,6 +124,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
 
   return (
     <div
+      data-testid="smm-post-card"
       onClick={isSelectionMode ? (e) => { e.stopPropagation(); onSelect?.(post.id) } : onClick}
       className={`relative bg-white dark:bg-gray-900 rounded-xl shadow-sm border transition-all cursor-pointer group overflow-hidden flex flex-col ${
         isSelected
@@ -352,6 +353,7 @@ export default function PostCard({ post, onClick, onStatusChange, onSelect, isSe
         <div className="pt-1">
           {nextStatus && (
             <button
+              data-testid="smm-advance-btn"
               onClick={handleAdvanceStatus}
               className="w-full text-xs py-1.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600"
             >

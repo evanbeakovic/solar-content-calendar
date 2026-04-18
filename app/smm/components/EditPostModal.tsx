@@ -405,7 +405,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
   const imageUrl = getImageUrl(currentImagePath)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+    <div data-testid="smm-edit-modal" className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-gray-200 dark:border-gray-700">
 
         {/* Sticky header */}
@@ -488,7 +488,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
             </div>
 
             {/* Close button */}
-            <button onClick={requestClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button data-testid="smm-modal-close" onClick={requestClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -630,6 +630,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
                     <div className="relative group">
                       {/* Natural aspect ratio thumbnail (Bug C) */}
                       <img
+                        data-testid="smm-modal-image"
                         src={imageUrl}
                         alt="Post image"
                         className="w-full h-auto object-contain max-h-64 cursor-pointer"
@@ -867,7 +868,7 @@ export default function EditPostModal({ post, clients, onClose, onUpdated, onDel
             {/* Headline */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Headline</label>
-              <textarea value={form.headline} onChange={(e) => handleChange('headline', e.target.value)}
+              <textarea data-testid="smm-headline-input" value={form.headline} onChange={(e) => handleChange('headline', e.target.value)}
                 placeholder="Post headline..." rows={1}
                 style={{ resize: 'none' }}
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800" />
