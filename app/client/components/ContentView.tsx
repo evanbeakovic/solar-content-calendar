@@ -77,8 +77,8 @@ export default function ContentView({
 
   function getImageUrl(path: string | null) {
     if (!path) return null
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path
-    return `https://lnxrnvypvyxykofgiael.supabase.co/storage/v1/object/public/post-images/${cleanPath}`
+    if (path.startsWith('https://')) return path
+    return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://pub-41587758c865498eae690b029e8a7f21.r2.dev'}/${path}`
   }
 
   async function handleCardApprove(postId: string) {
