@@ -70,6 +70,7 @@ export default function ClientPostCard({
 
   return (
     <div
+      data-testid="post-card"
       className={`rounded-2xl overflow-hidden border transition-all group cursor-pointer flex flex-col ${
         isDark
           ? 'bg-[#111827] border-white/[0.07] hover:border-white/[0.18]'
@@ -81,6 +82,7 @@ export default function ClientPostCard({
       <div className="relative overflow-hidden flex-shrink-0 aspect-square w-full">
         {imageUrl ? (
           <img
+            data-testid="post-card-image"
             src={imageUrl}
             alt={post.headline || 'Post'}
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
@@ -224,6 +226,7 @@ export default function ClientPostCard({
                   <button
                     onClick={() => onApprove(post.id)}
                     disabled={approving}
+                    data-testid="approve-btn"
                     className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20 transition-all flex items-center justify-center gap-1 disabled:opacity-50"
                   >
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">

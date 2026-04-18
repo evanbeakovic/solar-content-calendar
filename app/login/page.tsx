@@ -79,6 +79,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                data-testid="email-input"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] focus:border-transparent text-gray-900 bg-gray-50 transition-all"
                 placeholder="you@example.com"
               />
@@ -90,6 +91,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                data-testid="password-input"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10375C] focus:border-transparent text-gray-900 bg-gray-50 transition-all"
                 placeholder="••••••••"
               />
@@ -107,6 +109,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
+              data-testid="login-submit"
               className="w-full bg-[#10375C] text-white py-3 rounded-xl font-semibold hover:bg-[#0d2d4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg shadow-[#10375C]/20"
             >
               {loading ? (

@@ -27,7 +27,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://api.github.com/users/evanbeakovic)",
       "Bash(npx tsc:*)",
       "Bash(echo \"Exit: $?\")",
-      "Bash(find '/Users/evanbeakovic/Desktop/Solar Content Calender' -name *.sql -o -name *migration*)"
+      "Bash(find '/Users/evanbeakovic/Desktop/Solar Content Calender' -name *.sql -o -name *migration*)",
+      "Bash(npx playwright *)"
     ],
     "additionalDirectories": [
       "/Users/evanbeakovic/Desktop/Solar Content Calender/app/api/clients/[id]"

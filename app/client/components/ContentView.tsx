@@ -230,6 +230,7 @@ export default function ContentView({
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
+              data-testid={`tab-${tab.key}`}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 isActive ? tabActive : tabBase
               }`}
@@ -279,6 +280,7 @@ export default function ContentView({
       {/* ── Detail panel overlay ─────────────────────────────── */}
       {selectedPost && (
         <div
+          data-testid="post-modal"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => { setSelectedPost(null); resetInlineForm() }}
         >
@@ -307,7 +309,7 @@ export default function ContentView({
               style={{ aspectRatio: aspectRatioToCSS(getAspectRatioForPost(selectedPost.format || '', (selectedPost.platform || '').split(' + ').filter(Boolean))) }}
             >
               {currentImageUrl ? (
-                <img src={currentImageUrl} alt="Post" className="w-full h-full object-contain" />
+                <img data-testid="modal-image" src={currentImageUrl} alt="Post" className="w-full h-full object-contain" />
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center"
@@ -454,6 +456,7 @@ export default function ContentView({
                     <button
                       onClick={handlePanelApprove}
                       disabled={approvingId === selectedPost.id}
+                      data-testid="modal-approve-btn"
                       className="w-full py-2.5 rounded-xl text-sm font-semibold bg-green-500 hover:bg-green-400 text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
