@@ -6,7 +6,7 @@ import { format, startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth, isW
 import PostCard from './PostCard'
 import NewPostModal from './NewPostModal'
 import EditPostModal from './EditPostModal'
-import CSVImportModal from './CSVImportModal'
+import CsvImporter from './CsvImporter'
 
 interface KanbanBoardProps {
   initialPosts: Post[]
@@ -220,15 +220,8 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
     setEditingPost(null)
   }
 
-  // Fix 4 — handle replaced posts from CSV import
-  function handleImportComplete(newPosts: Post[], replacedPosts?: Post[]) {
-    const replaced = replacedPosts || []
-    const replacedIds = new Set(replaced.map(p => p.id))
-    setPosts(prev => {
-      const updated = prev.map(p => replacedIds.has(p.id) ? (replaced.find(r => r.id === p.id) ?? p) : p)
-      const brandNew = newPosts.filter(p => !replacedIds.has(p.id))
-      return [...brandNew, ...updated]
-    })
+  function handleImportComplete(newPosts: Post[]) {
+    setPosts(prev => [...newPosts, ...prev])
     setShowCSVImport(false)
   }
 
@@ -573,7 +566,7 @@ export default function KanbanBoard({ initialPosts, clients }: KanbanBoardProps)
         />
       )}
       {showCSVImport && (
-        <CSVImportModal
+        <CsvImporter
           clients={clients}
           onClose={() => setShowCSVImport(false)}
           onImported={handleImportComplete}

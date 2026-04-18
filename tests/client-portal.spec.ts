@@ -75,45 +75,65 @@ test('clicking a post card opens the modal with a visible image', async ({ page 
 })
 
 // ── 4. Approve flow ───────────────────────────────────────────────────────────
-test('approving a post moves it out of Awaiting Your Review', async ({ page }) => {
-  await page.goto('/client', { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('[data-testid="post-card"], [data-testid="tab-awaiting"]', { timeout: 30000 })
+// Uses a temporary synthetic post so real production data is never touched.
+test.describe('Approve flow', () => {
+  const TEST_HEADLINE = 'PLAYWRIGHT_TEST_POST - delete me'
+  let testPostId: string | null = null
 
-  // Make sure we're on the "Awaiting Your Review" tab
-  await page.getByTestId('tab-awaiting').click()
-  await page.waitForSelector('[data-testid="post-card"]', { timeout: 15000 }).catch(() => null)
+  test.beforeEach(async ({ page }) => {
+    const clientId = process.env.TEST_CLIENT_ID
+    if (!clientId) return
 
-  const awaitingCards = page.getByTestId('post-card')
-  const initialCount = await awaitingCards.count()
+    const res = await page.request.post('/api/posts', {
+      data: {
+        client_id: clientId,
+        status: 'To Be Confirmed',
+        headline: TEST_HEADLINE,
+      },
+    })
+    if (res.ok()) {
+      const post = await res.json()
+      testPostId = post.id
+    }
+  })
 
-  if (initialCount === 0) {
-    test.skip(true, 'No posts in "Awaiting Your Review" — skipping approve flow test')
-    return
-  }
+  test.afterEach(async ({ page }) => {
+    if (testPostId) {
+      await page.request.delete(`/api/posts/${testPostId}`)
+      testPostId = null
+    }
+  })
 
-  // Click Approve on the first card
-  const approveBtn = page.getByTestId('approve-btn').first()
-  await expect(approveBtn).toBeVisible()
-  await approveBtn.click()
+  test('approving a post moves it out of Awaiting Your Review', async ({ page }) => {
+    if (!process.env.TEST_CLIENT_ID) {
+      test.skip(true, 'TEST_CLIENT_ID not set in .env.test — skipping approve flow test')
+      return
+    }
+    if (!testPostId) {
+      test.skip(true, 'Could not create test post — skipping approve flow test')
+      return
+    }
 
-  // After approval the count in Awaiting should decrease
-  await page.waitForFunction(
-    (count) => {
-      const cards = document.querySelectorAll('[data-testid="post-card"]')
-      return cards.length < count
-    },
-    initialCount,
-    { timeout: 10000 }
-  )
+    await page.goto('/client', { waitUntil: 'domcontentloaded' })
+    await page.waitForSelector('[data-testid="tab-awaiting"]', { timeout: 30000 })
+    await page.getByTestId('tab-awaiting').click()
 
-  const newCount = await awaitingCards.count()
-  expect(newCount).toBeLessThan(initialCount)
+    // Find only the synthetic test post — never touch real posts
+    const testCard = page.getByTestId('post-card').filter({ hasText: TEST_HEADLINE })
+    await expect(testCard).toBeVisible({ timeout: 15000 })
 
-  // Switch to Approved tab and verify the card is there
-  await page.getByTestId('tab-approved').click()
-  await page.waitForSelector('[data-testid="post-card"]', { timeout: 5000 }).catch(() => null)
-  const approvedCards = await page.getByTestId('post-card').count()
-  expect(approvedCards).toBeGreaterThan(0)
+    const approveBtn = testCard.getByTestId('approve-btn')
+    await expect(approveBtn).toBeVisible()
+    await approveBtn.click()
+
+    // Test card should leave the Awaiting tab after approval
+    await expect(testCard).not.toBeVisible({ timeout: 10000 })
+
+    // Switch to Approved tab and confirm the post landed there
+    await page.getByTestId('tab-approved').click()
+    const approvedCard = page.getByTestId('post-card').filter({ hasText: TEST_HEADLINE })
+    await expect(approvedCard).toBeVisible({ timeout: 5000 })
+  })
 })
 
 // ── 5. Tab switching ──────────────────────────────────────────────────────────
